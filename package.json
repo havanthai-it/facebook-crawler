@@ -1,0 +1,21 @@
+{
+  "name": "crawler",
+  "version": "1.0.0",
+  "description": "Crawler",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "havanthai",
+  "license": "ISC",
+  "dependencies": {
+    "app-root-path": "^3.0.0",
+    "bull": "^3.16.0",
+    "moment": "^2.27.0",
+    "mysql": "^2.18.1",
+    "puppeteer": "^5.2.1",
+    "uuid": "^8.3.0",
+    "winston": "^3.3.3",
+    "winston-daily-rotate-file": "^4.5.0"
+  }
+}
