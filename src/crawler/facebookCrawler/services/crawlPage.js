@@ -22,7 +22,8 @@ const crawlPage = (url, isNew) => {
         return reject(`[CRAWL PAGE] This page ${url} was already crawled`);
       } else if ((!page || page.length === 0) && !isNew) {
         // If isNew = false and page was not found on db
-        return reject(`[CRAWL PAGE] This page ${url} was not been crawled before`);
+        // return reject(`[CRAWL PAGE] This page ${url} was not been crawled before`);
+        isNew = true;
       }
 
       const browser = await puppeteer.launch({ 
@@ -66,9 +67,9 @@ const crawlPage = (url, isNew) => {
 
       // if this page has never been crawled before, scroll to bottom 3 times
       // else scroll to bottom 1 times
-      let nScrolls = 1;
+      let nScrolls = 2;
       if (isNew) {
-        nScrolls = 3;
+        nScrolls = 5;
       }
       for (let i = 0; i < nScrolls; i++) {
         logger.info(`[CRAWL PAGE] Scroll to bottom ${url}`);
@@ -119,12 +120,12 @@ const crawlPage = (url, isNew) => {
 
           // likes
           if (iconEle && iconEle.getAttribute('src') === 'https://static.xx.fbcdn.net/rsrc.php/v3/yg/r/AT9YNs6Rbpt.png') {
-            likes = ele.innerText.split(' ')[0];
+            likes = Integer.parseInt(ele.innerText.split(' ')[0].replace( /\D+/g, ''));
           }
 
           // follows
           if (iconEle && iconEle.getAttribute('src') === 'https://static.xx.fbcdn.net/rsrc.php/v3/y7/r/PL1sMLehMAU.png') {
-            follows = ele.innerText.split(' ')[0];
+            follows = Integer.parseInt(ele.innerText.split(' ')[0].replace( /\D+/g, ''));
           }
         });
 
@@ -167,7 +168,7 @@ const crawlPage = (url, isNew) => {
       /* START GET ADS POST */
       let lstAds = await page0.evaluate((facebookPage) => {
         let result = [];
-        let lstPostEle = document.querySelectorAll('div._1xnd > div._4-u2._4-u8:not([id])');
+        let lstPostEle = document.querySelectorAll('div._1xnd > div._4-u2._4-u8:not([id]):not([class*="_3xaf"])');
 
         lstPostEle.forEach(item => {
           // TYPE
@@ -198,23 +199,25 @@ const crawlPage = (url, isNew) => {
           }
 
           // GET CONTENT
-          let ele4 = item.querySelector('div._5pbx');
+          let ele4 = item.querySelector('div._5pbx p');
+          let ele4ChildIgnore = ele4 ? ele4.querySelector('text_exposed_hide') : null;
+          if (ele4ChildIgnore) ele4ChildIgnore.parentNode.removeChild(ele4ChildIgnore);
           let content = ele4 ? ele4.innerText : '';
 
           // GET LIKES
           let ele5 = item.querySelector('div._68wo div._66lg a._3dlf');
           let likeStr = ele5 ? ele5.innerText : '';
-          let likes = likeStr ? parseInt(likeStr.replace( /^\D+/g, '')) : 0;
+          let likes = likeStr ? parseInt(likeStr.replace( /\D+/g, '')) : 0;
 
           // GET COMMENTS
           let ele6 = item.querySelector('div._68wo div._4vn1 a._3hg-');
           let commentStr = ele6 ? ele6.innerText : '';
-          let comments = commentStr ? parseInt(commentStr.replace( /^\D+/g, '')) : 0;
+          let comments = commentStr ? parseInt(commentStr.replace( /\D+/g, '')) : 0;
 
           // GET SHARES
           let ele7 = item.querySelector('div._68wo div._4vn1 a._3rwx');
           let shareStr = ele7 ? ele7.innerText : '';
-          let shares = shareStr ? parseInt(shareStr.replace( /^\D+/g, '')) : 0;
+          let shares = shareStr ? parseInt(shareStr.replace( /\D+/g, '')) : 0;
 
           // GET VIEWS
 
@@ -231,10 +234,22 @@ const crawlPage = (url, isNew) => {
           // GET PUBLISHED DATE
           const now = new Date();
           let ele9 = item.querySelector('._5pcp._5lel .fsm');
-          let pubishDateStr = ele9 ? ele9.innerText.split('at')[0].trim() : '';
-          let publishDate = pubishDateStr;
-          if (pubishDateStr.indexOf('second') > -1 || pubishDateStr.indexOf('min') > -1 || pubishDateStr.indexOf('hour') > -1 || pubishDateStr.indexOf('today') > -1) {
-            publishDate = now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate();
+          let arrDateTime = ele9 ? ele9.innerText.split('at') : []
+          let pubishDateStr = arrDateTime.length > 0 ? arrDateTime[0].trim() : '';
+          let publishTimeStr = arrDateTime.length > 1 ? (arrDateTime[1].trim() + ':00') : '00:00:00';
+          let publishDate = '0000-00-00';
+          if (pubishDateStr.indexOf('second') > -1 || pubishDateStr.indexOf('min') > -1 || pubishDateStr.indexOf('hour') > -1 || pubishDateStr.indexOf('hr') > -1 || pubishDateStr.indexOf('today') > -1) {
+            publishDate = now.getUTCFullYear() + '-' + (now.getUTCMonth() + 1) + '-' + now.getUTCDate();
+
+            if (pubishDateStr.indexOf('second') > -1) {
+              publishTimeStr = now.getUTCHours() + ':' + now.getUTCMinutes + ':00';
+            } else if (pubishDateStr.indexOf('min') > -1) {
+              publishTimeStr = now.getUTCHours() + ':00:00';
+            } else if (pubishDateStr.indexOf('hour') > -1 || pubishDateStr.indexOf('hr') > -1) {
+              publishTimeStr = pubishDateStr.split(' ')[0] + ':00:00';
+            } else {
+              publishTimeStr = '00:00:00';
+            }
           } else {
             let publishDateStrArr = pubishDateStr.split(' ');
             if (publishDateStrArr.length < 2) return;
@@ -243,7 +258,7 @@ const crawlPage = (url, isNew) => {
       
             let date = ('0' + publishDateStrArr[0]).substr(-2);
             let month;
-            let year = publishDateStrArr.length === 3 ? publishDateStrArr[2] : now.getFullYear();
+            let year = publishDateStrArr.length === 3 ? publishDateStrArr[2] : now.getUTCFullYear();
       
             if (publishDateStrArr[1] === 'January' || publishDateStrArr[1] === 'Jan') {
               month = '01';
@@ -293,7 +308,7 @@ const crawlPage = (url, isNew) => {
             sLinks: links.join(),
             sWebsite: '',
             sPlatform: '',
-            dPublish: publishDate,
+            dPublish: publishDate + ' ' + publishTimeStr,
             //dCreate: '',
             //dUpdate: ''
           });
@@ -372,12 +387,14 @@ const crawlPage = (url, isNew) => {
             } else if (post.sWebsite.indexOf('etsy.com') > -1) {
               post.sPlatform = 'etsy';
             } else {
-              if (document.querySelector('.shopify-section')) {
+              if (document.querySelector('script[src*="shopify"]')) {
                 post.sPlatform = 'shopify';
               } else if (document.querySelector('div[class*="woocommerce"]')) {
                 post.sPlatform = 'woocommerce';
               } else if (document.querySelector('a[src*="bigcommerce"]')) {
                 post.sPlatform = 'bigcommerce';
+              } else if (document.querySelector('script[data-requiremodule*="Magento_PageBuilder"]')) {
+                post.sPlatform = 'magento';
               }
             }
 
