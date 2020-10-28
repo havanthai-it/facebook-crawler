@@ -21,7 +21,7 @@ const config = {
   },
   queue: {
     pageQueue: {
-      concurrency: 1
+      concurrency: 3
     }
   }
 }

@@ -13,6 +13,7 @@ const DateUtils = require('../../../utils/DateUtils');
  */
 const crawlPage = (url, isNew) => {
   return new Promise(async (resolve, reject) => {
+    let browser;
     try {
       // Check whether or not this page was crawled
       const username = url.split('?')[0].split('/')[3];
@@ -26,8 +27,8 @@ const crawlPage = (url, isNew) => {
         isNew = true;
       }
 
-      const browser = await puppeteer.launch({ 
-        headless: false,
+      browser = await puppeteer.launch({ 
+        headless: true,
         args: [
           '--disable-gpu',
           '--no-sandbox',
@@ -61,6 +62,7 @@ const crawlPage = (url, isNew) => {
         logger.info(`[CRAWL PAGE] Load successfully ${url}`);
       } catch (e) {
         logger.error(`[CRAWL PAGE] Can not get response ${url}`);
+        browser.close();
         return reject(e);
       }
 
@@ -103,9 +105,11 @@ const crawlPage = (url, isNew) => {
           if (iconEle && iconEle.getAttribute('src') === 'https://static.xx.fbcdn.net/rsrc.php/v3/y5/r/vfXKA62x4Da.png') {
             const address = ele.innerText;
             const foundCountry = countriesJson.countries.find(c => {
-              return address && address.toLowerCase().indexOf(c.name.toLowerCase()) > -1;
+              return address 
+                && (address.toLowerCase().indexOf(c.name.toLowerCase()) > -1)
+                && (address.indexOf(c.code) > -1);
             });
-            country = foundCountry.name;
+            country = foundCountry ? foundCountry.name : '';
           }
 
           // category
@@ -120,12 +124,12 @@ const crawlPage = (url, isNew) => {
 
           // likes
           if (iconEle && iconEle.getAttribute('src') === 'https://static.xx.fbcdn.net/rsrc.php/v3/yg/r/AT9YNs6Rbpt.png') {
-            likes = Integer.parseInt(ele.innerText.split(' ')[0].replace( /\D+/g, ''));
+            likes = parseInt(ele.innerText.split(' ')[0].replace( /\D+/g, ''));
           }
 
           // follows
           if (iconEle && iconEle.getAttribute('src') === 'https://static.xx.fbcdn.net/rsrc.php/v3/y7/r/PL1sMLehMAU.png') {
-            follows = Integer.parseInt(ele.innerText.split(' ')[0].replace( /\D+/g, ''));
+            follows = parseInt(ele.innerText.split(' ')[0].replace( /\D+/g, ''));
           }
         });
 
@@ -199,10 +203,10 @@ const crawlPage = (url, isNew) => {
           }
 
           // GET CONTENT
-          let ele4 = item.querySelector('div._5pbx p');
+          let ele4 = item.querySelector('div._5pbx');
           let ele4ChildIgnore = ele4 ? ele4.querySelector('text_exposed_hide') : null;
           if (ele4ChildIgnore) ele4ChildIgnore.parentNode.removeChild(ele4ChildIgnore);
-          let content = ele4 ? ele4.innerText : '';
+          let content = ele4 ? ele4.innerHTML : '';
 
           // GET LIKES
           let ele5 = item.querySelector('div._68wo div._66lg a._3dlf');
@@ -337,7 +341,8 @@ const crawlPage = (url, isNew) => {
             await sleep(5000);
           } catch (e) {
             logger.error(`[CRAWL ADS] Can not get response ${url1} ${e}`);
-            continue;
+            browser.close();
+            return post;
           }
 
           // GET WEBSITE
@@ -424,6 +429,7 @@ const crawlPage = (url, isNew) => {
       return resolve(facebookPage);
     } catch (e) {
       logger.error(e);
+      if (browser) browser.close();
       return reject(e);
     }
   });
