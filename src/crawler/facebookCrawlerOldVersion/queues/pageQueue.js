@@ -1,7 +1,5 @@
 const Queue = require('bull');
 const logger = require('../../../utils/logger');
-const Browser = require('../../../utils/Browser');
-const sleep = require('../../../utils/funcs/sleep');
 const config = require('../../../config');
 const FacebookPageDao = require('../../../dao/FacebookPageDao');
 const FacebookAdsDao = require('../../../dao/FacebookAdsDao');
@@ -10,24 +8,16 @@ const crawlPage = require('../services/crawlPage');
 const pageQueue = new Queue('pageQueue', 'redis://127.0.0.1:6379');
 pageQueue.process(config.queue.pageQueue.concurrency, async (job) => {
   try {
-    if (!Browser.instance) {
-      await sleep(60000);
-    }
+    const p = job.data;
+    logger.info(`[PAGE QUEUE] ${p.url}`);
 
-    logger.info(`[PAGE QUEUE] Start crawl ${job.data.url}`);
-
-    // Check whether or not this page was crawled
-    const username = job.data.url.split('?')[0].split('/')[3];
-    const foundPage = await FacebookPageDao.getByUsername(username);
-    if (foundPage && foundPage.length) {
-      return Promise.reject(`[PAGE QUEUE] This page ${job.data.url} was already crawled`);
-    }
-
-    const facebookPage = await crawlPage(job.data.url, true);
+    const facebookPage = await crawlPage(p.url, true);
     logger.info(`[PAGE QUEUE] crawled page info: ${JSON.stringify(facebookPage)}`);
 
+
     // Save page info
-    if (!foundPage || foundPage.length === 0) {
+    const page = await FacebookPageDao.getByUsername(facebookPage.sUsername);
+    if (!page || page.length === 0) {
       await FacebookPageDao.insert(facebookPage);
     } else {
       await FacebookPageDao.update(facebookPage);
@@ -42,6 +32,7 @@ pageQueue.process(config.queue.pageQueue.concurrency, async (job) => {
       } else {
         await FacebookAdsDao.update(post);
       }
+      await FacebookAdsDao.insertStatistic(post);
     });
 
 
@@ -54,10 +45,12 @@ pageQueue.process(config.queue.pageQueue.concurrency, async (job) => {
       if (!page || page.length === 0) {
         url = url.split('?')[0];
         logger.info(`[PAGE QUEUE] ADDED ${url}`);
-        pageQueue.add({ url: url })
+        pageQueue.add({ url: url });
+        await FacebookPageDao.insertPageUrl(url);
       }
     });
 
+    await FacebookPageDao.deletePageUrl(p.url);
 
     return Promise.resolve(job.data);
   } catch (e) {

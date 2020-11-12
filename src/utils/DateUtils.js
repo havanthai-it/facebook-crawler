@@ -1,7 +1,7 @@
 const moment = require('moment');
 const logger = require('./logger');
 
-class UrlUtils {
+class DateUtils {
 
   constructor() { }
 
@@ -59,4 +59,4 @@ class UrlUtils {
 
 }
 
-module.exports = UrlUtils;
+module.exports = DateUtils;

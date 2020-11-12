@@ -1,10 +1,10 @@
 const puppeteer = require('puppeteer');
 const moment = require('moment');
 const logger = require('../../../utils/logger');
+const Browser = require('../../../utils/Browser');
 const sleep = require('../../../utils/funcs/sleep');
 const FacebookPage = require('../../../models/FacebookPage');
 const FacebookPageDao = require('../../../dao/FacebookPageDao');
-const countriesJson = require('../../../assets/data/countries.json');
 const DateUtils = require('../../../utils/DateUtils');
 
 /**
@@ -13,31 +13,8 @@ const DateUtils = require('../../../utils/DateUtils');
  */
 const crawlPage = (url, isNew) => {
   return new Promise(async (resolve, reject) => {
-    let browser;
     try {
-      // Check whether or not this page was crawled
-      const username = url.split('?')[0].split('/')[3];
-      const page = await FacebookPageDao.getByUsername(username);
-      if (page && page.length > 0 && isNew) {
-        // If isNew = true and page was found on db
-        return reject(`[CRAWL PAGE] This page ${url} was already crawled`);
-      } else if ((!page || page.length === 0) && !isNew) {
-        // If isNew = false and page was not found on db
-        // return reject(`[CRAWL PAGE] This page ${url} was not been crawled before`);
-        isNew = true;
-      }
-
-      browser = await puppeteer.launch({ 
-        headless: true,
-        args: [
-          '--disable-gpu',
-          '--no-sandbox',
-          '--single-process', 
-          '--disable-web-security',
-          '--disable-dev-profile'
-        ]
-      });
-      const page0 = await browser.newPage();
+      const page0 = await Browser.instance.newPage();
       await page0.setViewport({ width: 1920, height: 1080 });
 
       const cookies = [
@@ -50,19 +27,16 @@ const crawlPage = (url, isNew) => {
       await page0.setCookie(...cookies);
       await page0.goto(url);
 
-      // Slow down the process
-      await sleep(3000);
-
       try {
         // await new feed
-        await page0.waitForSelector('#pagelet_timeline_main_column');
-        // await similar page
-        await page0.waitForSelector('#pages_side_column ul.uiList');
+        await page0.waitForSelector('.k4urcfbm.dp1hu0rb.d2edcug0.cbu4d94t.j83agx80.bp9cbjyn');
+        // await related page
+        await page0.waitForSelector('.sjgh65i0');
 
         logger.info(`[CRAWL PAGE] Load successfully ${url}`);
       } catch (e) {
         logger.error(`[CRAWL PAGE] Can not get response ${url}`);
-        browser.close();
+        if (page0) page0.close();
         return reject(e);
       }
 
@@ -83,161 +57,155 @@ const crawlPage = (url, isNew) => {
 
 
       /* START GET PAGE INFORMATION */
-      let facebookPage = await page0.evaluate((countriesJson) => {
-        const el0 = document.querySelector('head > meta[property="al:ios:url"]');
-        const el1 = document.querySelector('#entity_sidebar ._19sz a._64-f');
-        const el2 = document.querySelector('#entity_sidebar a._2dgj img._6tb5');
-        const el3 = document.querySelector('#pages_side_column ._7jo_ ._3qnf > span');
+      let facebookPage = await page0.evaluate(() => {
+        // const el0 = document.querySelector('.bi6gxh9e.aov4n071 .tojvnm2t.a6sixzi8.abs2jz4q.a8s20v7p.t1p8iaqh.k5wvi7nf.q3lfd5jv.pk4s997a.bipmatt0.cebpdrjk.qowsmv63.owwhemhu.dp1hu0rb.dhp61c6y.iyyx5f41');
+        const el1 = document.querySelector('.d2edcug0.hpfvmrgz.qv66sw1b.c1et5uql.rrkovp55.a8c37x1j.keod5gw0.nxhoafnm.aigsh9s9.embtmqzv.fe6kdd0r.mau55g9w.c8b282yb.hrzyx87i.m6dqt4wy.h7mekvxk.hnhda86s.oo9gr5id.hzawbc8m');
+        const el2 = document.querySelector('.b3onmgus.e5nlhep0.ph5uu5jm.ecm0bbzt.spb7xbtv.bkmhp75w.emlxlaya.s45kfl79.cwj9ozl2 image');
+        const el3 = document.querySelector('.s9t1a10h > span');
         // const el5 = document.querySelector('');
         // const el6 = document.querySelector('');
 
-        const lstAboutEle = document.querySelectorAll('#pages_side_column ._4-u2._u9q._3xaf._4-u8 ._2pi9._2pi2');
-        const lstCommunityEle = document.querySelectorAll('#pages_side_column ._4-u2._6590._3xaf._4-u8 ._2pi9._2pi2');
-        let country = '';
+        const lstAboutEle = document.querySelectorAll('.cbu4d94t.j83agx80.cwj9ozl2  .dwo3fsh8.g5ia77u1.rt8b4zig.n8ej3o3l.agehan2d.sk4xxmp2.rq0escxv.q9uorilb.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.jb3vyjys.rz4wbd8a.qt6c0cv9.a8nywdso.l9j0dhe7.i1ao9s8h.k4urcfbm');
         let category = '';
         let likes = 0;
         let follows = 0;
+        let publishDateStr = el3 ? (el3.innerText.match(/Page created - /g) ? el3.innerText.substr(15).trim() : '') : '';
+        let publishDate = publishDateStr ? new Date(publishDateStr) : null;
 
         lstAboutEle.forEach(ele => {
-          const iconEle = ele.querySelector('div._4bl7 > img');
-          
-          // country
-          if (iconEle && iconEle.getAttribute('src') === 'https://static.xx.fbcdn.net/rsrc.php/v3/y5/r/vfXKA62x4Da.png') {
-            const address = ele.innerText;
-            const foundCountry = countriesJson.countries.find(c => {
-              return address 
-                && (address.toLowerCase().indexOf(c.name.toLowerCase()) > -1)
-                && (address.indexOf(c.code) > -1);
-            });
-            country = foundCountry ? foundCountry.name : '';
-          }
 
           // category
-          if (iconEle && iconEle.getAttribute('src') === 'https://static.xx.fbcdn.net/rsrc.php/v3/yl/r/LwDWwC1d0Rx.png') {
-            const cats = ele.innerText;
-            category = cats.replace(/ · /g, ',');
+          if (ele === lstAboutEle[lstAboutEle.length - 1]) {
+            category = ele.innerText.replace(/ · /g, ',');
           }
-        });
-
-        lstCommunityEle.forEach(ele => {
-          const iconEle = ele.querySelector('div._4bl7 > img');
 
           // likes
-          if (iconEle && iconEle.getAttribute('src') === 'https://static.xx.fbcdn.net/rsrc.php/v3/yg/r/AT9YNs6Rbpt.png') {
-            likes = parseInt(ele.innerText.split(' ')[0].replace( /\D+/g, ''));
+          if (ele.innerText.indexOf('people like this') > -1) {
+            likes = parseInt(ele.innerText.trim().split(' ')[0].replace( /\D+/g, ''));
           }
 
           // follows
-          if (iconEle && iconEle.getAttribute('src') === 'https://static.xx.fbcdn.net/rsrc.php/v3/y7/r/PL1sMLehMAU.png') {
-            follows = parseInt(ele.innerText.split(' ')[0].replace( /\D+/g, ''));
+          if (ele.innerText.indexOf('people follow this') > -1) {
+            follows = parseInt(ele.innerText.trim().split(' ')[0].replace( /\D+/g, ''));
           }
+
         });
 
         let result = {
-          sFacebookId: el0 ? new URL(el0.getAttribute('content')).searchParams.get('id') : '',
-          sUsername: el1 ? el1.getAttribute('href').split('?')[0].split('/')[3] : '',
+          sUsername: document.URL.split('?')[0].split('/')[3],
           sName: el1 ? el1.innerText : '',
-          sThumbnail: el2 ? el2.getAttribute('src') : '',
+          sThumbnail: el2 ? el2.getAttribute('xlink:href') : '',
           sCategory: category,
-          sCountry: country,
+          sCountry: '',
           nHasAds: 0,
           nLikes: likes,
           nFollows: follows,
-          dPublish: el3 ? (el3.innerText.match(/Page created – /g) ? el3.innerText.substr(15).trim() : '') : '',
+          dPublish: publishDate ? publishDate.getFullYear() + '-' + ('0' + (publishDate.getMonth() + 1)).substr(-2) + '-' + ('0' + publishDate.getDate()).substr(-2) : '',
           sStatus: 'ACTIVE',
           lstAds: [],
           lstSimilarPages: []
-        }
+        };
 
         return result;
-      }, countriesJson);
-      facebookPage.dPublish = DateUtils.convertFBDateToYYYYMMDD(facebookPage.dPublish);
+      });
       /* END GET PAGE INFORMATION */
 
 
       /* START GET SIMILAR PAGE */
-      facebookPage.lstSimilarPages = await page0.evaluate(() => {
-        let result = [];
-        let items = document.querySelectorAll('#pages_side_column ul.uiList > li._4-lt');
-        items.forEach(item => {
-          const el0 = item.querySelector('a._4-lu');
-          result.push(el0 ? el0.getAttribute('href') : '');
-        });
+      // facebookPage.lstSimilarPages = await page0.evaluate(() => {
+      //   let result = [];
+      //   let items = document.querySelectorAll('#pages_side_column ul.uiList > li._4-lt');
+      //   items.forEach(item => {
+      //     const el0 = item.querySelector('a._4-lu');
+      //     result.push(el0 ? el0.getAttribute('href') : '');
+      //   });
 
-        return result;
-      });
+      //   return result;
+      // });
       /* END GET SIMILAR PAGE */
 
 
       /* START GET ADS POST */
       let lstAds = await page0.evaluate((facebookPage) => {
         let result = [];
-        let lstPostEle = document.querySelectorAll('div._1xnd > div._4-u2._4-u8:not([id]):not([class*="_3xaf"])');
+        let lstPostEle = document.querySelectorAll('.k4urcfbm .du4w35lb.k4urcfbm.l9j0dhe7.sjgh65i0');
 
         lstPostEle.forEach(item => {
           // TYPE
           let type = '';
 
           // GET POST ID
-          let ele0 = item.querySelector('._5pcp._5lel .fsm a');
-          let postUrl = ele0 ? ele0.getAttribute('href').split('?')[0] : '';
-          postUrl = postUrl.endsWith('/') ? postUrl.substr(0, postUrl.length -1) : postUrl;
-          let postId = postUrl ? postUrl.split('/')[postUrl.split('/').length - 1] : '';
+          let postId = '';
  
           // GET IMAGES
-          let ele1 = item.querySelectorAll('.mtm a img');
+          let ele0 = item.querySelector('a.oajrlxb2.gs1a9yip.g5ia77u1.mtkw9kbi.tlpljxtp.qensuy8j.ppp5ayq2.goun2846.ccm00jje.s44p3ltw.mk2mc5f4.rt8b4zig.n8ej3o3l.agehan2d.sk4xxmp2.rq0escxv.nhd2j8a9.a8c37x1j.mg4g778l.btwxx1t3.pfnyh3mw.p7hjln8o.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.tgvbjcpo.hpfvmrgz.jb3vyjys.rz4wbd8a.qt6c0cv9.a8nywdso.l9j0dhe7.i1ao9s8h.esuyzwwr.f1sip0of.du4w35lb.lzcic4wl.abiwlrkh.p8dawk7l.tm8avpzi')
+          let ele1 = item.querySelectorAll('img.i09qtzwb.n7fi1qx3.datstx6m.pmk7jnqg.j9ispegn.kr520xx4.k4urcfbm');
           let images = [];
-          if (ele1) ele1.forEach(i => {
+          if (ele0 && ele1) ele1.forEach(i => {
             images.push(i.getAttribute('src'))
+            const url = ele0.getAttribute('href').split('?')[0];
+            postId = url.split('/')[url.split('/').length - 1]
             type = 'IMAGE';
           });
 
           // GET VIDEOS
-          let ele2 = item.querySelector('.mtm ._150c img._3chq'); // Video thumbnail
-          let ele3 = item.querySelectorAll('.mtm video');
+          //let ele2 = item.querySelector('.mtm ._150c img._3chq'); // Video thumbnail
+          let ele2 = item.querySelector('video.k4urcfbm.datstx6m.a8c37x1j');
+          let ele3 = item.querySelector('a[aria-label="Enlarge"]');
           let videos = [];
-          if (ele3 && ele3.length > 0 && ele2) {
-            images = [];
-            images.push(ele2.getAttribute('src')); // Get thumbnail for video
+          if (ele2 && ele3) {
+            videos.push(ele2.getAttribute('src'));
+            const url = ele3.getAttribute('href').split('?')[0];
+            postId = url.split('/')[url.split('/').length - 1]
             type = 'VIDEO';
           }
 
+          // CLICK SEE MORE BUTTON
+          let eleSeeMore = item.querySelector('div.oajrlxb2.g5ia77u1.qu0x051f.esr5mh6w.e9989ue4.r7d6kgcz.rq0escxv.nhd2j8a9.nc684nl6.p7hjln8o.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.jb3vyjys.rz4wbd8a.qt6c0cv9.a8nywdso.i1ao9s8h.esuyzwwr.f1sip0of.lzcic4wl.oo9gr5id.gpro0wi8.lrazzd5p');
+          if (eleSeeMore) eleSeeMore.click();
+
           // GET CONTENT
-          let ele4 = item.querySelector('div._5pbx');
-          let ele4ChildIgnore = ele4 ? ele4.querySelector('text_exposed_hide') : null;
-          if (ele4ChildIgnore) ele4ChildIgnore.parentNode.removeChild(ele4ChildIgnore);
+          let ele4 = item.querySelector('span.d2edcug0.hpfvmrgz.qv66sw1b.c1et5uql.rrkovp55.a8c37x1j.keod5gw0.nxhoafnm.aigsh9s9.d3f4x2em.fe6kdd0r.mau55g9w.c8b282yb.iv3no6db.gfeo3gy3.a3bd9o3v.knj5qynh.oo9gr5id.hzawbc8m');
           let content = ele4 ? ele4.innerHTML : '';
 
-          // GET LIKES
-          let ele5 = item.querySelector('div._68wo div._66lg a._3dlf');
-          let likeStr = ele5 ? ele5.innerText : '';
-          let likes = likeStr ? parseInt(likeStr.replace( /\D+/g, '')) : 0;
+          // GET BOTTOM ROW (LIKE, SHARE, COMMENT)
+          let eleBottomRow = item.querySelector('.bp9cbjyn.m9osqain.j83agx80.jq4qci2q.bkfpd7mw.a3bd9o3v.kvgmc6g5.wkznzc2l.oygrvhab.dhix69tm.jktsbyx5.rz4wbd8a.osnr6wyh.a8nywdso.s1tcr66n');
 
-          // GET COMMENTS
-          let ele6 = item.querySelector('div._68wo div._4vn1 a._3hg-');
-          let commentStr = ele6 ? ele6.innerText : '';
-          let comments = commentStr ? parseInt(commentStr.replace( /\D+/g, '')) : 0;
+          let likes = 0;
+          let comments = 0;
+          let shares = 0;
+          if (eleBottomRow) {
+            // GET LIKES
+            let ele5 = eleBottomRow.querySelector('.bp9cbjyn.j83agx80.buofh1pr.ni8dbmo4.stjgntxs .tojvnm2t.a6sixzi8.abs2jz4q.a8s20v7p.t1p8iaqh.k5wvi7nf.q3lfd5jv.pk4s997a.bipmatt0.cebpdrjk.qowsmv63.owwhemhu.dp1hu0rb.dhp61c6y.iyyx5f41');
+            let likeStr = ele5 ? ele5.innerText : '';
+            likes = likeStr ? parseInt(likeStr.replace( /\D+/g, '')) : 0;
 
-          // GET SHARES
-          let ele7 = item.querySelector('div._68wo div._4vn1 a._3rwx');
-          let shareStr = ele7 ? ele7.innerText : '';
-          let shares = shareStr ? parseInt(shareStr.replace( /\D+/g, '')) : 0;
+            // GET COMMENTS
+            let ele6 = eleBottomRow.querySelector('.bp9cbjyn.j83agx80.pfnyh3mw.p1ueia1e span.d2edcug0.hpfvmrgz.qv66sw1b.c1et5uql.rrkovp55.a8c37x1j.keod5gw0.nxhoafnm.aigsh9s9.d3f4x2em.fe6kdd0r.mau55g9w.c8b282yb.iv3no6db.gfeo3gy3.a3bd9o3v.knj5qynh.m9osqain');
+            let commentStr = ele6 ? ele6.innerText : '';
+            comments = commentStr ? parseInt(commentStr.replace( /\D+/g, '')) : 0;
 
+            // GET SHARES
+            let ele7 = eleBottomRow.querySelector('.bp9cbjyn.j83agx80.pfnyh3mw.p1ueia1e span.tojvnm2t.a6sixzi8.abs2jz4q.a8s20v7p.t1p8iaqh.k5wvi7nf.q3lfd5jv.pk4s997a.bipmatt0.cebpdrjk.qowsmv63.owwhemhu.dp1hu0rb.dhp61c6y.iyyx5f41');
+            let shareStr = ele7 ? ele7.innerText : '';
+            shares = shareStr ? parseInt(shareStr.replace( /\D+/g, '')) : 0;
+          }
           // GET VIEWS
 
           // GET LINKS
-          let ele8 = ele4 ? ele4.querySelectorAll('a') : [];
+          let ele8 = ele4 ? ele4.querySelectorAll('a.oajrlxb2.g5ia77u1.qu0x051f.esr5mh6w.e9989ue4.r7d6kgcz.rq0escxv.nhd2j8a9.nc684nl6.p7hjln8o.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.jb3vyjys.rz4wbd8a.qt6c0cv9.a8nywdso.i1ao9s8h.esuyzwwr.f1sip0of.lzcic4wl.py34i1dx.gpro0wi8') : [];
           let links = [];
           ele8.forEach(a => {
-            let href = a.getAttribute('href'); // Sample: https://l.facebook.com/l.php?u=https%3A%2F%2Faothun.vn%2F
+            let href = a.getAttribute('href'); // Sample: https://l.facebook.com/l.php?u=http%3A%2F%2Faothunjapan.com%2F%3Ffbclid%3DIwAR05Yh4k2-ZQh4xJoHBJCUarT-wvBILkEWmlX_LTorIJMgPF8y1obeMum24&h=AT1IfT4SMOt914SMODAQ1cuOetgvN2-xcnfy2OIbRnuT0BydfKXK7_liJacWx3B7O1BOWDi1ekBi0tNt9BYxGDv0KkhWgkATc1tyri_oP4QBJoIv-fwTR9d7649gc_8m58ek&__tn__=-UK-R&c[0]=AT1SP6jU-MwhOg6oScYISIkgd9cLxrRc07P7EJ6Ijbu3L8-caTCMhB_K3N-AHSVa4ahEvf1XpFCEDunGiVUzJm4Ph8DsynhxZfMrHHQckkbgJ983sfPFS6l4BtIVjQskVJEBP8ZGs_vXIF6xrW3scu8jJat_L_6skoWIbe2JY0aTcA
             let params = new URLSearchParams(href.split('?')[1]);
-            if (params.get('u') && !links.find(l => l === params.get('u'))) links.push(params.get('u'));
+            let link = params.get('u') ? params.get('u').split('?')[0] : '';
+            if (link) links.push(link);
           });
           if (links.length !== 1) return; // Ignore post that don't have any links or have multiple links
 
           // GET PUBLISHED DATE
           const now = new Date();
-          let ele9 = item.querySelector('._5pcp._5lel .fsm');
+          let ele9 = item.querySelector('.gpro0wi8.j1lvzwm4.stjgntxs.ni8dbmo4.q9uorilb');
           let arrDateTime = ele9 ? ele9.innerText.split('at') : []
           let pubishDateStr = arrDateTime.length > 0 ? arrDateTime[0].trim() : '';
           let publishTimeStr = arrDateTime.length > 1 ? (arrDateTime[1].trim() + ':00') : '00:00:00';
@@ -255,67 +223,68 @@ const crawlPage = (url, isNew) => {
               publishTimeStr = '00:00:00';
             }
           } else {
-            let publishDateStrArr = pubishDateStr.split(' ');
-            if (publishDateStrArr.length < 2) return;
-            if (publishDateStrArr.length > 3) return;
-            if (isNaN(publishDateStrArr[0])) return;
+            let publishDateStrArr = pubishDateStr.split(',')[0].trim().split(' ');
+            if (publishDateStrArr.length !== 2) return;
+            if (isNaN(publishDateStrArr[1])) return;
       
-            let date = ('0' + publishDateStrArr[0]).substr(-2);
+            let date = ('0' + publishDateStrArr[1]).substr(-2);
             let month;
-            let year = publishDateStrArr.length === 3 ? publishDateStrArr[2] : now.getUTCFullYear();
+            let year = pubishDateStr.split(',').length === 2 ? pubishDateStr.split(',')[1].trim() : now.getUTCFullYear();
       
-            if (publishDateStrArr[1] === 'January' || publishDateStrArr[1] === 'Jan') {
+            if (publishDateStrArr[0] === 'January' || publishDateStrArr[0] === 'Jan') {
               month = '01';
-            } else if (publishDateStrArr[1] === 'February' || publishDateStrArr[1] === 'Feb') {
+            } else if (publishDateStrArr[0] === 'February' || publishDateStrArr[0] === 'Feb') {
               month = '02';
-            } else if (publishDateStrArr[1] === 'March' || publishDateStrArr[1] === 'Mar') {
+            } else if (publishDateStrArr[0] === 'March' || publishDateStrArr[0] === 'Mar') {
               month = '03';
-            } else if (publishDateStrArr[1] === 'April' || publishDateStrArr[1] === 'Apr') {
+            } else if (publishDateStrArr[0] === 'April' || publishDateStrArr[0] === 'Apr') {
               month = '04';
-            } else if (publishDateStrArr[1] === 'May' || publishDateStrArr[1] === 'May') {
+            } else if (publishDateStrArr[0] === 'May' || publishDateStrArr[0] === 'May') {
               month = '05';
-            } else if (publishDateStrArr[1] === 'June' || publishDateStrArr[1] === 'June') {
+            } else if (publishDateStrArr[0] === 'June' || publishDateStrArr[0] === 'June') {
               month = '06';
-            } else if (publishDateStrArr[1] === 'July' || publishDateStrArr[1] === 'July') {
+            } else if (publishDateStrArr[0] === 'July' || publishDateStrArr[0] === 'July') {
               month = '07';
-            } else if (publishDateStrArr[1] === 'August' || publishDateStrArr[1] === 'Aug') {
+            } else if (publishDateStrArr[0] === 'August' || publishDateStrArr[0] === 'Aug') {
               month = '08';
-            } else if (publishDateStrArr[1] === 'September' || publishDateStrArr[1] === 'Sep') {
+            } else if (publishDateStrArr[0] === 'September' || publishDateStrArr[0] === 'Sep') {
               month = '09';
-            } else if (publishDateStrArr[1] === 'October' || publishDateStrArr[1] === 'Oct') {
+            } else if (publishDateStrArr[0] === 'October' || publishDateStrArr[0] === 'Oct') {
               month = '10';
-            } else if (publishDateStrArr[1] === 'November' || publishDateStrArr[1] === 'Nov') {
+            } else if (publishDateStrArr[0] === 'November' || publishDateStrArr[0] === 'Nov') {
               month = '11';
-            } else if (publishDateStrArr[1] === 'December' || publishDateStrArr[1] === 'Dec') {
+            } else if (publishDateStrArr[0] === 'December' || publishDateStrArr[0] === 'Dec') {
               month = '12';
             }
             publishDate = year + '-' + month + '-' + date;
           }
           
-          result.push({
-            sPostId: postId,
-            sAdsId: null,
-            sPixelId: '',
-            sFacebookPageId: facebookPage.sFacebookId,
-            sImages: images.join(),
-            sVideos: videos.join(),
-            sContent: content,
-            sType: type,
-            sCategory: facebookPage.sCategory,
-            sCountry: facebookPage.sCountry,
-            sLanguage: null,
-            nLikes: likes,
-            nComments: comments,
-            nShares: shares,
-            nViews: 0,
-            sStatus: 'ACTIVE',
-            sLinks: links.join(),
-            sWebsite: '',
-            sPlatform: '',
-            dPublish: publishDate + ' ' + publishTimeStr,
-            //dCreate: '',
-            //dUpdate: ''
-          });
+          if (postId && links.length > 0 && (images.length > 0 || videos.length > 0)) {
+            result.push({
+              sPostId: postId,
+              sAdsId: null,
+              sPixelId: '',
+              sFacebookPageUsername: facebookPage.sUsername,
+              sImages: images.join(),
+              sVideos: videos.join(),
+              sContent: content,
+              sType: type,
+              sCategory: facebookPage.sCategory,
+              sCountry: facebookPage.sCountry,
+              sLanguage: null,
+              nLikes: likes,
+              nComments: comments,
+              nShares: shares,
+              nViews: 0,
+              sStatus: 'ACTIVE',
+              sLinks: links.join(),
+              sWebsite: '',
+              sPlatform: '',
+              dPublish: publishDate + ' ' + publishTimeStr,
+              //dCreate: '',
+              //dUpdate: ''
+            });
+          }
         });
 
         return result;
@@ -323,7 +292,6 @@ const crawlPage = (url, isNew) => {
       /* END GET ADS POST */
 
 
-      // SET HASADS
       if (lstAds.length > 0) {
 
         // For each ads post, go to link in ads content to get platform, pixel id, website domain
@@ -332,16 +300,16 @@ const crawlPage = (url, isNew) => {
           /* START GO TO WEBSITE */
           const url1 = post.sLinks.split(',')[0];
           
-          const page1 = await browser.newPage();
+          const page1 = await Browser.instance.newPage();
           await page1.setViewport({ width: 1920, height: 1080 });
           await page1.goto(url1);
 
           try {
             await page1.waitForSelector('body');
-            await sleep(5000);
+            await sleep(3000);
           } catch (e) {
             logger.error(`[CRAWL ADS] Can not get response ${url1} ${e}`);
-            browser.close();
+            if (page1) await page1.close();
             return post;
           }
 
@@ -411,7 +379,7 @@ const crawlPage = (url, isNew) => {
             facebookPage.lstAds.push(newPost);
           }
 
-          await page1.close();
+          if (page1) await page1.close();
 
         }
         
@@ -424,12 +392,11 @@ const crawlPage = (url, isNew) => {
         facebookPage.nHasAds = 0;
       }
 
-      // Close browser
-      browser.close();
+      // Close page
+      if (page0) await page0.close();
       return resolve(facebookPage);
     } catch (e) {
       logger.error(e);
-      if (browser) browser.close();
       return reject(e);
     }
   });

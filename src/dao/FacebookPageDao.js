@@ -30,16 +30,6 @@ class FacebookPageDao {
   }
 
   /**
-   * @param {string} facebookId 
-   * @returns {FacebookPage}
-   */
-  static async getByFacebookId(facebookId) {
-    const query = "SELECT * FROM tb_facebook_page WHERE s_facebook_id = ?";
-    const result = await poolConnection.query(query, [facebookId]);
-    return result;
-  }
-
-  /**
    * @param {FacebookPage} facebookPage
    * @returns {boolean}
    */
@@ -47,7 +37,6 @@ class FacebookPageDao {
     const query = "INSERT INTO "
       + " tb_facebook_page ( "
       + " s_id, "
-      + " s_facebook_id, "
       + " s_username, "
       + " s_name, "
       + " s_thumbnail, "
@@ -58,10 +47,9 @@ class FacebookPageDao {
       + " n_follows, "
       + " d_publish "
       + " ) "
-      + " VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+      + " VALUES (?,?,?,?,?,?,?,?,?,?)";
     const params = [
       facebookPage.sId ? facebookPage.sId : uuidv4().replace(/-/g, ''),
-      facebookPage.sFacebookId,
       facebookPage.sUsername,
       facebookPage.sName,
       facebookPage.sThumbnail,
@@ -120,6 +108,26 @@ class FacebookPageDao {
       + " d_update = ? "
       + " WHERE s_id = ? ";
     const params = [status, moment(Date.now()).format('YYYY-MM-DD HH:mm:ss'), id];
+    const result = await poolConnection.query(query, params); 
+    return result;
+  }
+
+  /**
+   * @param {string} url 
+   */
+  static async insertPageUrl(url) {
+    const query = "INSERT tb_url(s_url) VALUES(?) ";
+    const params = [url];
+    const result = await poolConnection.query(query, params); 
+    return result;
+  }
+
+  /**
+   * @param {string} url 
+   */
+  static async deletePageUrl(url) {
+    const query = "DELETE FROM tb_url WHERE s_url = ? ";
+    const params = [url];
     const result = await poolConnection.query(query, params); 
     return result;
   }

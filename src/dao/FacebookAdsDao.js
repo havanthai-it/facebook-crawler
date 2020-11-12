@@ -38,7 +38,7 @@ class FacebookAdsDao {
       + " s_ads_id, "
       + " s_post_id, "
       + " s_pixel_id, "
-      + " s_facebook_page_id, "
+      + " s_facebook_page_username, "
       + " s_images, "
       + " s_videos, "
       + " s_content, "
@@ -62,7 +62,7 @@ class FacebookAdsDao {
       facebookAds.sAdsId,
       facebookAds.sPostId,
       facebookAds.sPixelId,
-      facebookAds.sFacebookPageId,
+      facebookAds.sFacebookPageUsername,
       facebookAds.sImages,
       facebookAds.sVideos,
       facebookAds.sContent,
@@ -141,6 +141,31 @@ class FacebookAdsDao {
       + " WHERE s_id = ? ";
     const params = [status, moment(Date.now()).format('YYYY-MM-DD HH:mm:ss'), id];
     const result = await poolConnection.query(query, params); 
+    return result;
+  }
+
+  /**
+   * @param {FacebookPost} facebookAds
+   * @returns {boolean}
+   */
+  static async insertStatistic(facebookAds) {
+    const query = "INSERT INTO "
+      + " tb_facebook_post_statistic ( "
+      + " s_facebook_post_id, "
+      + " n_likes, "
+      + " n_comments, "
+      + " n_shares, "
+      + " n_views "
+      + " ) "
+      + " VALUES (?,?,?,?,?)";
+    const params = [
+      facebookAds.sPostId,
+      facebookAds.nLikes ? parseInt(facebookAds.nLikes + '') : 0,
+      facebookAds.nComments ? parseInt(facebookAds.nComments + '') : 0,
+      facebookAds.nShares ? parseInt(facebookAds.nShares + '') : 0,
+      facebookAds.nViews ? parseInt(facebookAds.nViews + '') : 0
+    ];
+    const result = await poolConnection.query(query, params);
     return result;
   }
 

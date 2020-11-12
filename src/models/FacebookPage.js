@@ -5,7 +5,6 @@ class FacebookPage {
   constructor(json) {
     if (json) {
       this.sId = uuidv4().replace(/-/g, '');
-      this.sFacebookId = json.sFacebookId;
       this.sUsername = json.sUsername;
       this.sName = json.sName;
       this.sThumbnail = json.sThumbnail;

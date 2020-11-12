@@ -8,7 +8,7 @@ class FacebookAds {
       this.sPostId = json.sPostId;
       this.sAdsId = json.sAdsId;
       this.sPixelId = json.sPixelId;
-      this.sFacebookPageId = json.sFacebookPageId;
+      this.sFacebookPageUsername = json.sFacebookPageUsername;
       this.sImages = json.sImages;
       this.sVideos = json.sVideos;
       this.sContent = json.sContent;
