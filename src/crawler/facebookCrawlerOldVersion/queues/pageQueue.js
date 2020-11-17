@@ -8,10 +8,9 @@ const crawlPage = require('../services/crawlPage');
 const pageQueue = new Queue('pageQueue', 'redis://127.0.0.1:6379');
 pageQueue.process(config.queue.pageQueue.concurrency, async (job) => {
   try {
-    const p = job.data;
-    logger.info(`[PAGE QUEUE] ${p.url}`);
+    logger.info(`[PAGE QUEUE] ${job.data.url}`);
 
-    const facebookPage = await crawlPage(p.url, true);
+    const facebookPage = await crawlPage(job.data.url, true);
     logger.info(`[PAGE QUEUE] crawled page info: ${JSON.stringify(facebookPage)}`);
 
 
@@ -50,7 +49,7 @@ pageQueue.process(config.queue.pageQueue.concurrency, async (job) => {
       }
     });
 
-    await FacebookPageDao.deletePageUrl(p.url);
+    await FacebookPageDao.deletePageUrl(job.data.url);
 
     return Promise.resolve(job.data);
   } catch (e) {

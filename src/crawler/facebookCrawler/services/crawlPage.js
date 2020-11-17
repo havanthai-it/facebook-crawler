@@ -75,7 +75,7 @@ const crawlPage = (url, isNew) => {
         lstAboutEle.forEach(ele => {
 
           // category
-          if (ele === lstAboutEle[lstAboutEle.length - 1]) {
+          if (ele.querySelector('i.hu5pjgll.cwsop09l.sp_LM6_uToPDSq.sx_61eff3')) {
             category = ele.innerText.replace(/ · /g, ',');
           }
 
@@ -138,13 +138,14 @@ const crawlPage = (url, isNew) => {
           let postId = '';
  
           // GET IMAGES
-          let ele0 = item.querySelector('a.oajrlxb2.gs1a9yip.g5ia77u1.mtkw9kbi.tlpljxtp.qensuy8j.ppp5ayq2.goun2846.ccm00jje.s44p3ltw.mk2mc5f4.rt8b4zig.n8ej3o3l.agehan2d.sk4xxmp2.rq0escxv.nhd2j8a9.a8c37x1j.mg4g778l.btwxx1t3.pfnyh3mw.p7hjln8o.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.tgvbjcpo.hpfvmrgz.jb3vyjys.rz4wbd8a.qt6c0cv9.a8nywdso.l9j0dhe7.i1ao9s8h.esuyzwwr.f1sip0of.du4w35lb.lzcic4wl.abiwlrkh.p8dawk7l.tm8avpzi')
+          let ele0 = item.querySelector('a.oajrlxb2.gs1a9yip.g5ia77u1.mtkw9kbi.tlpljxtp.qensuy8j.ppp5ayq2.goun2846.ccm00jje.s44p3ltw.mk2mc5f4.rt8b4zig.n8ej3o3l.agehan2d.sk4xxmp2.rq0escxv.nhd2j8a9.a8c37x1j.mg4g778l.btwxx1t3.pfnyh3mw.p7hjln8o.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.tgvbjcpo.hpfvmrgz.jb3vyjys.rz4wbd8a.qt6c0cv9.a8nywdso.l9j0dhe7.i1ao9s8h.esuyzwwr.f1sip0of.du4w35lb.lzcic4wl.abiwlrkh.p8dawk7l.tm8avpzi');
           let ele1 = item.querySelectorAll('img.i09qtzwb.n7fi1qx3.datstx6m.pmk7jnqg.j9ispegn.kr520xx4.k4urcfbm');
           let images = [];
           if (ele0 && ele1) ele1.forEach(i => {
             images.push(i.getAttribute('src'))
             const url = ele0.getAttribute('href').split('?')[0];
-            postId = url.split('/')[url.split('/').length - 1]
+            postId = url.split('/')[url.split('/').length - 1];
+            if (!postId) postId = url.split('/')[url.split('/').length - 2];
             type = 'IMAGE';
           });
 
@@ -157,6 +158,7 @@ const crawlPage = (url, isNew) => {
             videos.push(ele2.getAttribute('src'));
             const url = ele3.getAttribute('href').split('?')[0];
             postId = url.split('/')[url.split('/').length - 1]
+            if (!postId) postId = url.split('/')[url.split('/').length - 2];
             type = 'VIDEO';
           }
 
@@ -176,19 +178,19 @@ const crawlPage = (url, isNew) => {
           let shares = 0;
           if (eleBottomRow) {
             // GET LIKES
-            let ele5 = eleBottomRow.querySelector('.bp9cbjyn.j83agx80.buofh1pr.ni8dbmo4.stjgntxs .tojvnm2t.a6sixzi8.abs2jz4q.a8s20v7p.t1p8iaqh.k5wvi7nf.q3lfd5jv.pk4s997a.bipmatt0.cebpdrjk.qowsmv63.owwhemhu.dp1hu0rb.dhp61c6y.iyyx5f41');
+            let ele5 = eleBottomRow.querySelector('.bp9cbjyn.j83agx80.buofh1pr.ni8dbmo4.stjgntxs .bzsjyuwj.ni8dbmo4.stjgntxs.ltmttdrg.gjzvkazv');
             let likeStr = ele5 ? ele5.innerText : '';
             likes = likeStr ? parseInt(likeStr.replace( /\D+/g, '')) : 0;
 
             // GET COMMENTS
-            let ele6 = eleBottomRow.querySelector('.bp9cbjyn.j83agx80.pfnyh3mw.p1ueia1e span.d2edcug0.hpfvmrgz.qv66sw1b.c1et5uql.rrkovp55.a8c37x1j.keod5gw0.nxhoafnm.aigsh9s9.d3f4x2em.fe6kdd0r.mau55g9w.c8b282yb.iv3no6db.gfeo3gy3.a3bd9o3v.knj5qynh.m9osqain');
-            let commentStr = ele6 ? ele6.innerText : '';
-            comments = commentStr ? parseInt(commentStr.replace( /\D+/g, '')) : 0;
-
-            // GET SHARES
-            let ele7 = eleBottomRow.querySelector('.bp9cbjyn.j83agx80.pfnyh3mw.p1ueia1e span.tojvnm2t.a6sixzi8.abs2jz4q.a8s20v7p.t1p8iaqh.k5wvi7nf.q3lfd5jv.pk4s997a.bipmatt0.cebpdrjk.qowsmv63.owwhemhu.dp1hu0rb.dhp61c6y.iyyx5f41');
-            let shareStr = ele7 ? ele7.innerText : '';
-            shares = shareStr ? parseInt(shareStr.replace( /\D+/g, '')) : 0;
+            let ele6 = eleBottomRow.querySelectorAll('.bp9cbjyn.j83agx80.pfnyh3mw.p1ueia1e span.d2edcug0.hpfvmrgz.qv66sw1b.c1et5uql.rrkovp55.a8c37x1j.keod5gw0.nxhoafnm.aigsh9s9.d3f4x2em.fe6kdd0r.mau55g9w.c8b282yb.iv3no6db.gfeo3gy3.a3bd9o3v.knj5qynh.m9osqain');
+            if (ele6) ele6.forEach (i => {
+              if (i.innerText.toLowerCase().indexOf('comment') > -1) {
+                comments = i.innerText.replace( /\D+/g, '');
+              } else if (i.innerText.toLowerCase().indexOf('share') > -1) {
+                shares = i.innerText.replace( /\D+/g, '');
+              }
+            });
           }
           // GET VIEWS
 
@@ -205,58 +207,52 @@ const crawlPage = (url, isNew) => {
 
           // GET PUBLISHED DATE
           const now = new Date();
-          let ele9 = item.querySelector('.gpro0wi8.j1lvzwm4.stjgntxs.ni8dbmo4.q9uorilb');
-          let arrDateTime = ele9 ? ele9.innerText.split('at') : []
-          let pubishDateStr = arrDateTime.length > 0 ? arrDateTime[0].trim() : '';
-          let publishTimeStr = arrDateTime.length > 1 ? (arrDateTime[1].trim() + ':00') : '00:00:00';
-          let publishDate = '0000-00-00';
-          if (pubishDateStr.indexOf('second') > -1 || pubishDateStr.indexOf('min') > -1 || pubishDateStr.indexOf('hour') > -1 || pubishDateStr.indexOf('hr') > -1 || pubishDateStr.indexOf('today') > -1) {
-            publishDate = now.getUTCFullYear() + '-' + (now.getUTCMonth() + 1) + '-' + now.getUTCDate();
+          let ele9 = item.querySelector('.j1lvzwm4.stjgntxs.ni8dbmo4.q9uorilb.gpro0wi8');
+          if (!ele9) return;
+          let eleJunk = ele9.querySelectorAll('span.b6zbclly.myohyog2.l9j0dhe7.aenfhxwr.l94mrbxd.ihxqhq3m.nc684nl6.t5a262vz.sdhka5h4');
+          if (eleJunk) eleJunk.forEach(i => {
+            if (i.getAttribute('style') === 'position: absolute; top: 3em;') {
+              i.parentNode.removeChild(i);
+            }
+          });
 
-            if (pubishDateStr.indexOf('second') > -1) {
-              publishTimeStr = now.getUTCHours() + ':' + now.getUTCMinutes + ':00';
-            } else if (pubishDateStr.indexOf('min') > -1) {
-              publishTimeStr = now.getUTCHours() + ':00:00';
-            } else if (pubishDateStr.indexOf('hour') > -1 || pubishDateStr.indexOf('hr') > -1) {
-              publishTimeStr = pubishDateStr.split(' ')[0] + ':00:00';
+          let rawDatetime = ele9.innerText.trim();
+          let datetime = '';
+          let tempDatetime = '';
+          if (rawDatetime.indexOf('second') > -1 || rawDatetime.indexOf('min') > -1 || rawDatetime.indexOf('hour') > -1 || rawDatetime.indexOf('hr') > -1) {
+            datetime = now.getUTCFullYear() + '-' + ('00' + (now.getUTCMonth() + 1)).substr(-2) + '-' + ('00' + now.getUTCDate()).substr(-2);
+
+            if (rawDatetime.indexOf('second') > -1) {
+              datetime = datetime + ' ' + now.getUTCHours() + ':' + now.getUTCMinutes + ':00';
+            } else if (rawDatetime.indexOf('min') > -1) {
+              datetime = datetime + ' ' + now.getUTCHours() + ':00:00';
+            } else if (rawDatetime.indexOf('hour') > -1 || rawDatetime.indexOf('hr') > -1) {
+              let hh = rawDatetime.split(' ')[0].replace( /\D+/g, '');
+              hh = ('00' + hh).substr(-2);
+              datetime = datetime + ' ' + hh + ':00:00';
             } else {
-              publishTimeStr = '00:00:00';
+              datetime = datetime + ' ' + '00:00:00';
             }
           } else {
-            let publishDateStrArr = pubishDateStr.split(',')[0].trim().split(' ');
-            if (publishDateStrArr.length !== 2) return;
-            if (isNaN(publishDateStrArr[1])) return;
-      
-            let date = ('0' + publishDateStrArr[1]).substr(-2);
-            let month;
-            let year = pubishDateStr.split(',').length === 2 ? pubishDateStr.split(',')[1].trim() : now.getUTCFullYear();
-      
-            if (publishDateStrArr[0] === 'January' || publishDateStrArr[0] === 'Jan') {
-              month = '01';
-            } else if (publishDateStrArr[0] === 'February' || publishDateStrArr[0] === 'Feb') {
-              month = '02';
-            } else if (publishDateStrArr[0] === 'March' || publishDateStrArr[0] === 'Mar') {
-              month = '03';
-            } else if (publishDateStrArr[0] === 'April' || publishDateStrArr[0] === 'Apr') {
-              month = '04';
-            } else if (publishDateStrArr[0] === 'May' || publishDateStrArr[0] === 'May') {
-              month = '05';
-            } else if (publishDateStrArr[0] === 'June' || publishDateStrArr[0] === 'June') {
-              month = '06';
-            } else if (publishDateStrArr[0] === 'July' || publishDateStrArr[0] === 'July') {
-              month = '07';
-            } else if (publishDateStrArr[0] === 'August' || publishDateStrArr[0] === 'Aug') {
-              month = '08';
-            } else if (publishDateStrArr[0] === 'September' || publishDateStrArr[0] === 'Sep') {
-              month = '09';
-            } else if (publishDateStrArr[0] === 'October' || publishDateStrArr[0] === 'Oct') {
-              month = '10';
-            } else if (publishDateStrArr[0] === 'November' || publishDateStrArr[0] === 'Nov') {
-              month = '11';
-            } else if (publishDateStrArr[0] === 'December' || publishDateStrArr[0] === 'Dec') {
-              month = '12';
+            let hasTime = true;
+            if (rawDatetime.indexOf('at') > -1 && rawDatetime.indexOf(',') > -1) {
+              tempDatetime = rawDatetime.replace('at', '').replace(',', '').replace(/\s\s+/g, ' ').replace(/\s/g, ' ');
+            } else if (rawDatetime.indexOf('at') > -1 && rawDatetime.indexOf(',') === -1) {
+              tempDatetime = rawDatetime.replace('at', now.getUTCFullYear()).replace(/\s/g, ' ');
+            } else if (rawDatetime.indexOf('at') === -1 && rawDatetime.indexOf(',') > -1) {
+              tempDatetime = rawDatetime.replace(',', '').replace(/\s/g, ' ');
+              hasTime = false;
+            } else if (rawDatetime.indexOf('at') === -1 && rawDatetime.indexOf(',') === -1) {
+              tempDatetime = (rawDatetime + ' ' + now.getUTCFullYear()).replace(/\s/g, ' ');
+              hasTime = false;
             }
-            publishDate = year + '-' + month + '-' + date;
+            let datetimeObj = new Date(tempDatetime);
+            datetime = datetimeObj.getUTCFullYear() + '-' + ('00' + (datetimeObj.getUTCMonth() + 1)).substr(-2) + '-' + ('00' + datetimeObj.getUTCDate()).substr(-2);
+            if (hasTime) {
+              datetime = datetime + ' ' + ('00' + datetimeObj.getUTCHours()).substr(-2) + ':' + ('00' + datetimeObj.getUTCMinutes()).substr(-2) + ':00';
+            } else {
+              datetime = datetime + ' ' + '00:00:00';
+            }
           }
           
           if (postId && links.length > 0 && (images.length > 0 || videos.length > 0)) {
@@ -280,7 +276,7 @@ const crawlPage = (url, isNew) => {
               sLinks: links.join(),
               sWebsite: '',
               sPlatform: '',
-              dPublish: publishDate + ' ' + publishTimeStr,
+              dPublish: datetime,
               //dCreate: '',
               //dUpdate: ''
             });
@@ -307,80 +303,77 @@ const crawlPage = (url, isNew) => {
           try {
             await page1.waitForSelector('body');
             await sleep(3000);
+
+            // GET WEBSITE
+            let websiteUrl = page1.url();
+            post.sWebsite = websiteUrl.split('/')[0] + '//' + websiteUrl.split('/')[2];
+            post.sWebsite = post.sWebsite.toLowerCase();
+
+            let newPost = await page1.evaluate((post) => {
+              // GET PIXEL ID
+              let scriptTag = document.querySelector('head script[src^="https://connect.facebook.net/signals/config"]');
+
+              if (scriptTag) {
+                let scriptLink = scriptTag.getAttribute('src').split('?')[0];
+                post.sPixelId = scriptLink.split('/')[scriptLink.split('/').length - 1]
+              } else {
+                // No pixel id found => should not crawl this page
+                return post;
+              }
+
+              // GET PLATFORM
+              if (post.sWebsite.indexOf('amazon.com') > -1) {
+                post.sPlatform = 'amazon';
+              } else if (post.sWebsite.indexOf('ebay.com') > -1) {
+                post.sPlatform = 'ebay';
+              } else if (post.sWebsite.indexOf('teechip.com') > -1) {
+                post.sPlatform = 'teechip';
+              } else if (post.sWebsite.indexOf('teemill.com') > -1) {
+                post.sPlatform = 'teemill';
+              } else if (post.sWebsite.indexOf('sunfrog.com') > -1) {
+                post.sPlatform = 'sunfrog';
+              } else if (post.sWebsite.indexOf('teespring.com') > -1) {
+                post.sPlatform = 'teespring';
+              } else if (post.sWebsite.indexOf('etsy.com') > -1) {
+                post.sPlatform = 'etsy';
+              } else if (post.sWebsite.indexOf('printshop.com') > -1) {
+                post.sPlatform = 'printshop';
+              } else if (post.sWebsite.indexOf('teepublic.com') > -1) {
+                post.sPlatform = 'teepublic';
+              } else if (post.sWebsite.indexOf('redbubble.com') > -1) {
+                post.sPlatform = 'redbubble';
+              } else if (post.sWebsite.indexOf('spreadshirt.com') > -1) {
+                post.sPlatform = 'spreadshirt';
+              } else if (post.sWebsite.indexOf('teespy.com') > -1) {
+                post.sPlatform = 'teespy';
+              } else if (post.sWebsite.indexOf('bonfire.com') > -1) {
+                post.sPlatform = 'bonfire';
+              } else if (post.sWebsite.indexOf('etsy.com') > -1) {
+                post.sPlatform = 'etsy';
+              } else {
+                if (document.querySelector('script[src*="shopify"]')) {
+                  post.sPlatform = 'shopify';
+                } else if (document.querySelector('div[class*="woocommerce"]')) {
+                  post.sPlatform = 'woocommerce';
+                } else if (document.querySelector('a[src*="bigcommerce"]')) {
+                  post.sPlatform = 'bigcommerce';
+                } else if (document.querySelector('script[data-requiremodule*="Magento_PageBuilder"]')) {
+                  post.sPlatform = 'magento';
+                }
+              }
+
+              return post;
+            }, post);
+            /* END GO TO WEBSITE */
+
+            if (newPost.sPixelId) {
+              facebookPage.lstAds.push(newPost);
+            }
           } catch (e) {
             logger.error(`[CRAWL ADS] Can not get response ${url1} ${e}`);
-            if (page1) await page1.close();
-            return post;
-          }
-
-          // GET WEBSITE
-          let websiteUrl = page1.url();
-          post.sWebsite = websiteUrl.split('/')[0] + '//' + websiteUrl.split('/')[2];
-          post.sWebsite = post.sWebsite.toLowerCase();
-
-          let newPost = await page1.evaluate((post) => {
-            // GET PIXEL ID
-            let scriptTag = document.querySelector('head script[src^="https://connect.facebook.net/signals/config"]');
-
-            if (scriptTag) {
-              let scriptLink = scriptTag.getAttribute('src').split('?')[0];
-              post.sPixelId = scriptLink.split('/')[scriptLink.split('/').length - 1]
-            } else {
-              // No pixel id found => should not crawl this page
-              return post;
-            }
-
-            // GET PLATFORM
-            if (post.sWebsite.indexOf('amazon.com') > -1) {
-              post.sPlatform = 'amazon';
-            } else if (post.sWebsite.indexOf('ebay.com') > -1) {
-              post.sPlatform = 'ebay';
-            } else if (post.sWebsite.indexOf('teechip.com') > -1) {
-              post.sPlatform = 'teechip';
-            } else if (post.sWebsite.indexOf('teemill.com') > -1) {
-              post.sPlatform = 'teemill';
-            } else if (post.sWebsite.indexOf('sunfrog.com') > -1) {
-              post.sPlatform = 'sunfrog';
-            } else if (post.sWebsite.indexOf('teespring.com') > -1) {
-              post.sPlatform = 'teespring';
-            } else if (post.sWebsite.indexOf('etsy.com') > -1) {
-              post.sPlatform = 'etsy';
-            } else if (post.sWebsite.indexOf('printshop.com') > -1) {
-              post.sPlatform = 'printshop';
-            } else if (post.sWebsite.indexOf('teepublic.com') > -1) {
-              post.sPlatform = 'teepublic';
-            } else if (post.sWebsite.indexOf('redbubble.com') > -1) {
-              post.sPlatform = 'redbubble';
-            } else if (post.sWebsite.indexOf('spreadshirt.com') > -1) {
-              post.sPlatform = 'spreadshirt';
-            } else if (post.sWebsite.indexOf('teespy.com') > -1) {
-              post.sPlatform = 'teespy';
-            } else if (post.sWebsite.indexOf('bonfire.com') > -1) {
-              post.sPlatform = 'bonfire';
-            } else if (post.sWebsite.indexOf('etsy.com') > -1) {
-              post.sPlatform = 'etsy';
-            } else {
-              if (document.querySelector('script[src*="shopify"]')) {
-                post.sPlatform = 'shopify';
-              } else if (document.querySelector('div[class*="woocommerce"]')) {
-                post.sPlatform = 'woocommerce';
-              } else if (document.querySelector('a[src*="bigcommerce"]')) {
-                post.sPlatform = 'bigcommerce';
-              } else if (document.querySelector('script[data-requiremodule*="Magento_PageBuilder"]')) {
-                post.sPlatform = 'magento';
-              }
-            }
-
-            return post;
-          }, post);
-          /* END GO TO WEBSITE */
-
-          if (newPost.sPixelId) {
-            facebookPage.lstAds.push(newPost);
           }
 
           if (page1) await page1.close();
-
         }
         
       }

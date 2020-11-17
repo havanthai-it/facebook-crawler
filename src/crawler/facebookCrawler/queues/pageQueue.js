@@ -33,7 +33,6 @@ pageQueue.process(config.queue.pageQueue.concurrency, async (job) => {
       await FacebookPageDao.update(facebookPage);
     }
 
-
     // Save post info
     facebookPage.lstAds.forEach(async (post) => {
       const foundPost = await FacebookAdsDao.getByPostId(post.sPostId);
@@ -42,6 +41,7 @@ pageQueue.process(config.queue.pageQueue.concurrency, async (job) => {
       } else {
         await FacebookAdsDao.update(post);
       }
+      await FacebookAdsDao.insertStatistic(post);
     });
 
 
@@ -55,9 +55,11 @@ pageQueue.process(config.queue.pageQueue.concurrency, async (job) => {
         url = url.split('?')[0];
         logger.info(`[PAGE QUEUE] ADDED ${url}`);
         pageQueue.add({ url: url })
+        await FacebookPageDao.insertPageUrl(url);
       }
     });
-
+    
+    await FacebookPageDao.deletePageUrl(job.data.url);
 
     return Promise.resolve(job.data);
   } catch (e) {
