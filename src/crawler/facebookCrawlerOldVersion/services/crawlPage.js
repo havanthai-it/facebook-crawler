@@ -251,14 +251,34 @@ const crawlPage = (url, isNew) => {
           if (pubishDateStr.indexOf('second') > -1 || pubishDateStr.indexOf('min') > -1 || pubishDateStr.indexOf('hour') > -1 || pubishDateStr.indexOf('hr') > -1 || pubishDateStr.indexOf('today') > -1) {
             publishDate = now.getUTCFullYear() + '-' + (now.getUTCMonth() + 1) + '-' + now.getUTCDate();
 
-            if (pubishDateStr.indexOf('second') > -1) {
-              publishTimeStr = now.getUTCHours() + ':' + now.getUTCMinutes + ':00';
-            } else if (pubishDateStr.indexOf('min') > -1) {
-              publishTimeStr = now.getUTCHours() + ':00:00';
-            } else if (pubishDateStr.indexOf('hour') > -1 || pubishDateStr.indexOf('hr') > -1) {
-              publishTimeStr = pubishDateStr.split(' ')[0] + ':00:00';
+            if (rawDatetime.indexOf('second') > -1) {
+              let ss = rawDatetime.split(' ')[0].replace( /\D+/g, '');
+              if (now.getUTCHours() === 0 && now.getUTCMinutes() === 0 && (now.getUTCSeconds() - ss) < 0) {
+                now.setMinutes(now.getMinutes() - 1);
+                publishDate = now.getUTCFullYear() + '-' + ('00' + (now.getUTCMonth() + 1)).substr(-2) + '-' + ('00' + now.getUTCDate()).substr(-2);
+                publishDate = publishDate + ' ' + now.getUTCHours() + ':' + now.getUTCMinutes + ':00';
+              } else {
+                publishDate = publishDate + ' ' + now.getUTCHours() + ':' + now.getUTCMinutes + ':00';
+              }
+            } else if (rawDatetime.indexOf('min') > -1) {
+              let mm = rawDatetime.split(' ')[0].replace( /\D+/g, '');
+              if (now.getUTCHours() === 0 && (now.getUTCMinutes() - mm) < 0) {
+                now.setMinutes(now.getMinutes() - mm);
+                publishDate = now.getUTCFullYear() + '-' + ('00' + (now.getUTCMonth() + 1)).substr(-2) + '-' + ('00' + now.getUTCDate()).substr(-2);
+                publishDate = publishDate + ' ' + now.getUTCHours() + ':00:00';
+              } else {
+                publishDate = publishDate + ' ' + now.getUTCHours() + ':00:00';
+              }
+            } else if (rawDatetime.indexOf('hour') > -1 || rawDatetime.indexOf('hr') > -1) {
+              let hh = rawDatetime.split(' ')[0].replace( /\D+/g, '');
+              if (now.getUTCHours() - hh < 0) {
+                now.setHours(now.getHours() - hh);
+                publishDate = publishDate + ' ' + now.getUTCHours() + ':00:00';
+              } else {
+                publishDate = publishDate + ' ' + now.getUTCHours() + ':00:00';
+              }
             } else {
-              publishTimeStr = '00:00:00';
+              publishDate = publishDate + ' ' + '00:00:00';
             }
           } else {
             let publishDateStrArr = pubishDateStr.split(' ');
@@ -345,9 +365,9 @@ const crawlPage = (url, isNew) => {
           const page1 = await browser.newPage();
           await page1.setDefaultNavigationTimeout(60000);
           await page1.setViewport({ width: 1920, height: 1080 });
-          await page1.goto(url1);
 
           try {
+            await page1.goto(url1);
             await page1.waitForSelector('body');
             await sleep(5000);
 

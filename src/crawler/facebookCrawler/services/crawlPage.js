@@ -223,13 +223,31 @@ const crawlPage = (url, isNew) => {
             datetime = now.getUTCFullYear() + '-' + ('00' + (now.getUTCMonth() + 1)).substr(-2) + '-' + ('00' + now.getUTCDate()).substr(-2);
 
             if (rawDatetime.indexOf('second') > -1) {
-              datetime = datetime + ' ' + now.getUTCHours() + ':' + now.getUTCMinutes + ':00';
+              let ss = rawDatetime.split(' ')[0].replace( /\D+/g, '');
+              if (now.getUTCHours() === 0 && now.getUTCMinutes() === 0 && (now.getUTCSeconds() - ss) < 0) {
+                now.setMinutes(now.getMinutes() - 1);
+                datetime = now.getUTCFullYear() + '-' + ('00' + (now.getUTCMonth() + 1)).substr(-2) + '-' + ('00' + now.getUTCDate()).substr(-2);
+                datetime = datetime + ' ' + now.getUTCHours() + ':' + now.getUTCMinutes + ':00';
+              } else {
+                datetime = datetime + ' ' + now.getUTCHours() + ':' + now.getUTCMinutes + ':00';
+              }
             } else if (rawDatetime.indexOf('min') > -1) {
-              datetime = datetime + ' ' + now.getUTCHours() + ':00:00';
+              let mm = rawDatetime.split(' ')[0].replace( /\D+/g, '');
+              if (now.getUTCHours() === 0 && (now.getUTCMinutes() - mm) < 0) {
+                now.setMinutes(now.getMinutes() - mm);
+                datetime = now.getUTCFullYear() + '-' + ('00' + (now.getUTCMonth() + 1)).substr(-2) + '-' + ('00' + now.getUTCDate()).substr(-2);
+                datetime = datetime + ' ' + now.getUTCHours() + ':00:00';
+              } else {
+                datetime = datetime + ' ' + now.getUTCHours() + ':00:00';
+              }
             } else if (rawDatetime.indexOf('hour') > -1 || rawDatetime.indexOf('hr') > -1) {
               let hh = rawDatetime.split(' ')[0].replace( /\D+/g, '');
-              hh = ('00' + hh).substr(-2);
-              datetime = datetime + ' ' + hh + ':00:00';
+              if (now.getUTCHours() - hh < 0) {
+                now.setHours(now.getHours() - hh);
+                datetime = datetime + ' ' + now.getUTCHours() + ':00:00';
+              } else {
+                datetime = datetime + ' ' + now.getUTCHours() + ':00:00';
+              }
             } else {
               datetime = datetime + ' ' + '00:00:00';
             }
@@ -297,12 +315,13 @@ const crawlPage = (url, isNew) => {
           const url1 = post.sLinks.split(',')[0];
           
           const page1 = await Browser.instance.newPage();
+          await page1.setDefaultNavigationTimeout(60000);
           await page1.setViewport({ width: 1920, height: 1080 });
-          await page1.goto(url1);
 
           try {
+            await page1.goto(url1);
             await page1.waitForSelector('body');
-            await sleep(3000);
+            await sleep(5000);
 
             // GET WEBSITE
             let websiteUrl = page1.url();
