@@ -20,7 +20,13 @@ const config = {
     queueLimit: 0
   },
   queue: {
-    pageQueue: {
+    randomPageQueue: {
+      concurrency: 2
+    },
+    adsPageQueue: {
+      concurrency: 2
+    },
+    urlPageQueue: {
       concurrency: 2
     }
   }

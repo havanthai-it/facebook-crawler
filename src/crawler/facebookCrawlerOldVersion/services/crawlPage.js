@@ -244,7 +244,8 @@ const crawlPage = (url, isNew) => {
           // GET PUBLISHED DATE
           const now = new Date();
           let ele9 = item.querySelector('._5pcp._5lel .fsm');
-          let arrDateTime = ele9 ? ele9.innerText.split('at') : []
+          let rawDatetime = ele9 ? ele9.innerText.trim() : '';
+          let arrDateTime = rawDatetime.split('at');
           let pubishDateStr = arrDateTime.length > 0 ? arrDateTime[0].trim() : '';
           let publishTimeStr = arrDateTime.length > 1 ? (arrDateTime[1].trim() + ':00') : '00:00:00';
           let publishDate = '0000-00-00';
@@ -253,7 +254,7 @@ const crawlPage = (url, isNew) => {
 
             if (rawDatetime.indexOf('second') > -1) {
               let ss = rawDatetime.split(' ')[0].replace( /\D+/g, '');
-              if (now.getUTCHours() === 0 && now.getUTCMinutes() === 0 && (now.getUTCSeconds() - ss) < 0) {
+              if (now.getHours() === 0 && now.getMinutes() === 0 && (now.getSeconds() - ss) < 0) {
                 now.setMinutes(now.getMinutes() - 1);
                 publishDate = now.getUTCFullYear() + '-' + ('00' + (now.getUTCMonth() + 1)).substr(-2) + '-' + ('00' + now.getUTCDate()).substr(-2);
                 publishDate = publishDate + ' ' + now.getUTCHours() + ':' + now.getUTCMinutes + ':00';
@@ -262,7 +263,7 @@ const crawlPage = (url, isNew) => {
               }
             } else if (rawDatetime.indexOf('min') > -1) {
               let mm = rawDatetime.split(' ')[0].replace( /\D+/g, '');
-              if (now.getUTCHours() === 0 && (now.getUTCMinutes() - mm) < 0) {
+              if (now.getHours() === 0 && (now.getMinutes() - mm) < 0) {
                 now.setMinutes(now.getMinutes() - mm);
                 publishDate = now.getUTCFullYear() + '-' + ('00' + (now.getUTCMonth() + 1)).substr(-2) + '-' + ('00' + now.getUTCDate()).substr(-2);
                 publishDate = publishDate + ' ' + now.getUTCHours() + ':00:00';
@@ -271,7 +272,7 @@ const crawlPage = (url, isNew) => {
               }
             } else if (rawDatetime.indexOf('hour') > -1 || rawDatetime.indexOf('hr') > -1) {
               let hh = rawDatetime.split(' ')[0].replace( /\D+/g, '');
-              if (now.getUTCHours() - hh < 0) {
+              if (now.getHours() - hh < 0) {
                 now.setHours(now.getHours() - hh);
                 publishDate = publishDate + ' ' + now.getUTCHours() + ':00:00';
               } else {
@@ -342,7 +343,7 @@ const crawlPage = (url, isNew) => {
             //dCreate: '',
             //dUpdate: ''
           };
-          if (post.sPostId && post.sImages && post.sFacebookPageUsername && post.sImages && post.sLinks) {
+          if (post.sPostId && post.sImages && post.sFacebookPageUsername && post.sLinks) {
             result.push(post);
           }
           

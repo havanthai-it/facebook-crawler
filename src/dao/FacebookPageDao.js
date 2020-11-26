@@ -30,6 +30,17 @@ class FacebookPageDao {
   }
 
   /**
+   * 
+   * @param {number} hasAds 
+   * @param {number} fetchSize 
+   */
+  static async list(hasAds, fetchSize) {
+    const query = "SELECT * FROM tb_facebook_page WHERE n_has_ads = ? ORDER BY d_last_crawl ASC LIMIT ?";
+    const result = await poolConnection.query(query, [hasAds, fetchSize]);
+    return result;
+  }
+
+  /**
    * @param {FacebookPage} facebookPage
    * @returns {boolean}
    */
@@ -71,7 +82,7 @@ class FacebookPageDao {
    */
   static async update(facebookPage) {
     const query = "UPDATE tb_facebook_page SET "
-      + " s_username = ?, "
+      // + " s_username = ?, "
       + " s_name = ?, "
       + " s_thumbnail = ?, "
       + " s_category = ?, "
@@ -82,7 +93,7 @@ class FacebookPageDao {
       + " d_update = ? "
       + " WHERE s_id = ? ";
     const params = [
-      facebookPage.sUsername,
+      // facebookPage.sUsername,
       facebookPage.sName,
       facebookPage.sThumbnail,
       facebookPage.sCategory,
@@ -109,6 +120,16 @@ class FacebookPageDao {
       + " WHERE s_id = ? ";
     const params = [status, moment(Date.now()).format('YYYY-MM-DD HH:mm:ss'), id];
     const result = await poolConnection.query(query, params); 
+    return result;
+  }
+
+  /**
+   * 
+   * @param {number} fetchSize 
+   */
+  static async listPageUrl(fetchSize) {
+    const query = "SELECT * FROM tb_url ORDER BY d_last_crawl ASC LIMIT ?";
+    const result = await poolConnection.query(query, [fetchSize]);
     return result;
   }
 

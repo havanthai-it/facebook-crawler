@@ -43,7 +43,7 @@ const crawlPage = (url, isNew) => {
 
       // if this page has never been crawled before, scroll to bottom 3 times
       // else scroll to bottom 1 times
-      let nScrolls = 2;
+      let nScrolls = 3;
       if (isNew) {
         nScrolls = 5;
       }
@@ -150,11 +150,12 @@ const crawlPage = (url, isNew) => {
           });
 
           // GET VIDEOS
-          //let ele2 = item.querySelector('.mtm ._150c img._3chq'); // Video thumbnail
+          let ele2a = item.querySelector('img.datstx6m.dbpd2lw6'); // Video thumbnail
           let ele2 = item.querySelector('video.k4urcfbm.datstx6m.a8c37x1j');
           let ele3 = item.querySelector('a[aria-label="Enlarge"]');
           let videos = [];
-          if (ele2 && ele3) {
+          if (ele2 && ele2a && ele3) {
+            images.push(ele2a.getAttribute('src'))
             videos.push(ele2.getAttribute('src'));
             const url = ele3.getAttribute('href').split('?')[0];
             postId = url.split('/')[url.split('/').length - 1]
@@ -224,7 +225,7 @@ const crawlPage = (url, isNew) => {
 
             if (rawDatetime.indexOf('second') > -1) {
               let ss = rawDatetime.split(' ')[0].replace( /\D+/g, '');
-              if (now.getUTCHours() === 0 && now.getUTCMinutes() === 0 && (now.getUTCSeconds() - ss) < 0) {
+              if (now.getHours() === 0 && now.getMinutes() === 0 && (now.getSeconds() - ss) < 0) {
                 now.setMinutes(now.getMinutes() - 1);
                 datetime = now.getUTCFullYear() + '-' + ('00' + (now.getUTCMonth() + 1)).substr(-2) + '-' + ('00' + now.getUTCDate()).substr(-2);
                 datetime = datetime + ' ' + now.getUTCHours() + ':' + now.getUTCMinutes + ':00';
@@ -233,7 +234,7 @@ const crawlPage = (url, isNew) => {
               }
             } else if (rawDatetime.indexOf('min') > -1) {
               let mm = rawDatetime.split(' ')[0].replace( /\D+/g, '');
-              if (now.getUTCHours() === 0 && (now.getUTCMinutes() - mm) < 0) {
+              if (now.getHours() === 0 && (now.getMinutes() - mm) < 0) {
                 now.setMinutes(now.getMinutes() - mm);
                 datetime = now.getUTCFullYear() + '-' + ('00' + (now.getUTCMonth() + 1)).substr(-2) + '-' + ('00' + now.getUTCDate()).substr(-2);
                 datetime = datetime + ' ' + now.getUTCHours() + ':00:00';
@@ -242,7 +243,7 @@ const crawlPage = (url, isNew) => {
               }
             } else if (rawDatetime.indexOf('hour') > -1 || rawDatetime.indexOf('hr') > -1) {
               let hh = rawDatetime.split(' ')[0].replace( /\D+/g, '');
-              if (now.getUTCHours() - hh < 0) {
+              if (now.getHours() - hh < 0) {
                 now.setHours(now.getHours() - hh);
                 datetime = datetime + ' ' + now.getUTCHours() + ':00:00';
               } else {
@@ -273,7 +274,7 @@ const crawlPage = (url, isNew) => {
             }
           }
           
-          if (postId && links.length > 0 && (images.length > 0 || videos.length > 0)) {
+          if (postId && links.length > 0 && images.length > 0 && facebookPage.sUsername && links.length > 0) {
             result.push({
               sPostId: postId,
               sAdsId: null,

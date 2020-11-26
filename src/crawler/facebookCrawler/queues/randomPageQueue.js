@@ -1,27 +1,37 @@
 const Queue = require('bull');
 const logger = require('../../../utils/logger');
+const Browser = require('../../../utils/Browser');
+const sleep = require('../../../utils/funcs/sleep');
 const config = require('../../../config');
 const FacebookPageDao = require('../../../dao/FacebookPageDao');
 const FacebookAdsDao = require('../../../dao/FacebookAdsDao');
 const crawlPage = require('../services/crawlPage');
 
-const pageQueue = new Queue('pageQueue', 'redis://127.0.0.1:6379');
-pageQueue.process(config.queue.randomPageQueue.concurrency, async (job) => {
+const randomPageQueue = new Queue('pageQueue', 'redis://127.0.0.1:6379');
+randomPageQueue.process(config.queue.randomPageQueue.concurrency, async (job) => {
   try {
-    logger.info(`[PAGE QUEUE] ${job.data.url}`);
+    if (!Browser.instance) {
+      await sleep(60000);
+    }
+
+    logger.info(`[RANDOM PAGE QUEUE] Start crawl ${job.data.url}`);
+
+    // Check whether or not this page was crawled
+    const username = job.data.url.split('?')[0].split('/')[3];
+    const foundPage = await FacebookPageDao.getByUsername(username);
+    if (foundPage && foundPage.length) {
+      return Promise.reject(`[RANDOM PAGE QUEUE] This page ${job.data.url} was already crawled`);
+    }
 
     const facebookPage = await crawlPage(job.data.url, true);
-    logger.info(`[PAGE QUEUE] crawled page info: ${JSON.stringify(facebookPage)}`);
-
+    logger.info(`[RANDOM PAGE QUEUE] crawled page info: ${JSON.stringify(facebookPage)}`);
 
     // Save page info
-    const page = await FacebookPageDao.getByUsername(facebookPage.sUsername);
-    if (!page || page.length === 0) {
+    if (!foundPage || foundPage.length === 0) {
       await FacebookPageDao.insert(facebookPage);
     } else {
       await FacebookPageDao.update(facebookPage);
     }
-
 
     // Save post info
     facebookPage.lstAds.forEach(async (post) => {
@@ -43,19 +53,19 @@ pageQueue.process(config.queue.randomPageQueue.concurrency, async (job) => {
       // Add page url to queue if page is not crawled yet
       if (!page || page.length === 0) {
         url = url.split('?')[0];
-        logger.info(`[PAGE QUEUE] ADDED ${url}`);
-        pageQueue.add({ url: url });
+        logger.info(`[RANDOM PAGE QUEUE] ADDED ${url}`);
+        randomPageQueue.add({ url: url })
         await FacebookPageDao.insertPageUrl(url);
       }
     });
-
+    
     await FacebookPageDao.deletePageUrl(job.data.url);
 
     return Promise.resolve(job.data);
   } catch (e) {
-    logger.error(`[PAGE QUEUE] ${e}`);
+    logger.error(`[RANDOM PAGE QUEUE] ${e}`);
     return Promise.reject(e);
   }
 });
 
-module.exports = pageQueue;
+module.exports = randomPageQueue;
