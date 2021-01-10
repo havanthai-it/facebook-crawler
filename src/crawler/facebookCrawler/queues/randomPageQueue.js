@@ -23,7 +23,7 @@ randomPageQueue.process(config.queue.randomPageQueue.concurrency, async (job) =>
       return Promise.reject(`[RANDOM PAGE QUEUE] This page ${job.data.url} was already crawled`);
     }
 
-    const facebookPage = await crawlPage(job.data.url, true);
+    const facebookPage = await crawlPage(job.data.url);
     logger.info(`[RANDOM PAGE QUEUE] crawled page info: ${JSON.stringify(facebookPage)}`);
 
     // Save page info

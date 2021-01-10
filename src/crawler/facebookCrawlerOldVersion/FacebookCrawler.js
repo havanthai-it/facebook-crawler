@@ -7,7 +7,7 @@ class FacebookCrawler {
   }
 
   static async start() {
-    const url = 'https://www.facebook.com/urbanoutfitters/';
+    const url = 'https://www.facebook.com/Amazing-Gifts-105234424840724/';
     pageQueue.add({ url: url });
   }
 

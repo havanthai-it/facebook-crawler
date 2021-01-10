@@ -23,7 +23,7 @@ adsPageQueue.process(config.queue.adsPageQueue.concurrency, async (job) => {
       return Promise.reject(`[URL PAGE QUEUE] This page ${job.data.url} was already crawled`);
     }
 
-    const facebookPage = await crawlPage(job.data.url, true);
+    const facebookPage = await crawlPage(job.data.url);
     logger.info(`[URL PAGE QUEUE] crawled page info: ${JSON.stringify(facebookPage)}`);
 
     // Save page info
@@ -49,6 +49,7 @@ adsPageQueue.process(config.queue.adsPageQueue.concurrency, async (job) => {
     return Promise.resolve(job.data);
   } catch (e) {
     logger.error(`[URL PAGE QUEUE] ${e}`);
+    await FacebookPageDao.deletePageUrl(job.data.url);
     return Promise.reject(e);
   }
 });

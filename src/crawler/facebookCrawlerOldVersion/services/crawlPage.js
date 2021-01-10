@@ -11,25 +11,12 @@ const DateUtils = require('../../../utils/DateUtils');
  * @param {string} url 
  * @returns {Promise<FacebookPage>}
  */
-const crawlPage = (url, isNew) => {
+const crawlPage = (url) => {
   return new Promise(async (resolve, reject) => {
     let browser;
     try {
-      // Check whether or not this page was crawled
-      const username = url.split('?')[0].split('/')[3];
-      const page = await FacebookPageDao.getByUsername(username);
-      if (page && page.length > 0 && isNew) {
-        // await FacebookPageDao.deletePageUrl(url);
-        // If isNew = true and page was found on db
-        // return reject(`[CRAWL PAGE] This page ${url} was already crawled`);
-      } else if ((!page || page.length === 0) && !isNew) {
-        // If isNew = false and page was not found on db
-        // return reject(`[CRAWL PAGE] This page ${url} was not been crawled before`);
-        isNew = true;
-      }
-
       browser = await puppeteer.launch({ 
-        headless: true,
+        headless: false,
         args: [
           '--disable-gpu',
           '--no-sandbox',
@@ -37,7 +24,7 @@ const crawlPage = (url, isNew) => {
           '--disable-web-security',
           '--disable-dev-profile',
           '--disable-notifications'
-          // '--proxy-server=SOCKS4://185.214.187.38:4145'
+          //'--proxy-server=HTTP://208.138.24.254:80'
         ]
       });
       const page0 = await browser.newPage();
@@ -55,7 +42,7 @@ const crawlPage = (url, isNew) => {
       await page0.goto(url);
 
       // Slow down the process
-      await sleep(1000);
+      await sleep(10000);
 
       try {
         // await new feed
@@ -73,13 +60,10 @@ const crawlPage = (url, isNew) => {
 
       // if this page has never been crawled before, scroll to bottom 3 times
       // else scroll to bottom 1 times
-      let nScrolls = 2;
-      if (isNew) {
-        nScrolls = 4;
-      }
+      let nScrolls = 1;
       for (let i = 0; i < nScrolls; i++) {
         logger.info(`[CRAWL PAGE] Scroll to bottom ${url}`);
-        await sleep(3000 + 3000 * Math.random());
+        await sleep(10000);
         await page0.evaluate(() => {
           window.scrollTo(0, document.body.scrollHeight);
         });

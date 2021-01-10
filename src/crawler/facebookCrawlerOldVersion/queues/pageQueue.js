@@ -10,7 +10,7 @@ pageQueue.process(config.queue.randomPageQueue.concurrency, async (job) => {
   try {
     logger.info(`[PAGE QUEUE] ${job.data.url}`);
 
-    const facebookPage = await crawlPage(job.data.url, true);
+    const facebookPage = await crawlPage(job.data.url);
     logger.info(`[PAGE QUEUE] crawled page info: ${JSON.stringify(facebookPage)}`);
 
 

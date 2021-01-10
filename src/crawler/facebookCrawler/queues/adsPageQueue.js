@@ -19,7 +19,7 @@ adsPageQueue.process(config.queue.adsPageQueue.concurrency, async (job) => {
     const username = job.data.url.split('?')[0].split('/')[3];
     const foundPage = await FacebookPageDao.getByUsername(username);
 
-    const facebookPage = await crawlPage(job.data.url, false);
+    const facebookPage = await crawlPage(job.data.url);
     logger.info(`[ADS PAGE QUEUE] crawled page info: ${JSON.stringify(facebookPage)}`);
 
     // Save page info

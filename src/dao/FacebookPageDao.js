@@ -128,7 +128,7 @@ class FacebookPageDao {
    * @param {number} fetchSize 
    */
   static async listPageUrl(fetchSize) {
-    const query = "SELECT * FROM tb_url ORDER BY d_last_crawl ASC LIMIT ?";
+    const query = "SELECT * FROM tb_url LIMIT ?";
     const result = await poolConnection.query(query, [fetchSize]);
     return result;
   }
