@@ -133,6 +133,16 @@ class FacebookPageDao {
     return result;
   }
 
+   /**
+   * 
+   * @param {string} url 
+   */
+  static async getPageUrl(url) {
+    const query = "SELECT * FROM tb_url WHERE s_url = ?";
+    const result = await poolConnection.query(query, [url]);
+    return result;
+  }
+
   /**
    * @param {string} url 
    */
@@ -152,6 +162,37 @@ class FacebookPageDao {
     const result = await poolConnection.query(query, params); 
     return result;
   }
+
+  /**
+   * 
+   * @param {number} fetchSize 
+   */
+  static async listSeedingKeyword(fetchSize) {
+    const query = "SELECT * FROM tb_seeding_keyword LIMIT ?";
+    const result = await poolConnection.query(query, [fetchSize]);
+    return result;
+  }
+
+  /**
+   * 
+   * @param {string} keyword 
+   */
+  static async getSeedingKeyword(keyword) {
+    const query = "SELECT * FROM tb_seeding_keyword WHERE s_keyword = ?";
+    const result = await poolConnection.query(query, [keyword]);
+    return result;
+  }
+
+  /**
+   * @param {string} keyword 
+   */
+  static async deleteSeedingKeyword(keyword) {
+    const query = "DELETE FROM tb_seeding_keyword WHERE s_keyword = ? ";
+    const params = [keyword];
+    const result = await poolConnection.query(query, params); 
+    return result;
+  }
+
 
 }
 

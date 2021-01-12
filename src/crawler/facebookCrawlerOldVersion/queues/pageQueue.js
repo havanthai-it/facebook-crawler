@@ -10,33 +10,11 @@ pageQueue.process(config.queue.randomPageQueue.concurrency, async (job) => {
   try {
     logger.info(`[PAGE QUEUE] ${job.data.url}`);
 
-    const facebookPage = await crawlPage(job.data.url);
-    logger.info(`[PAGE QUEUE] crawled page info: ${JSON.stringify(facebookPage)}`);
-
-
-    // Save page info
-    const page = await FacebookPageDao.getByUsername(facebookPage.sUsername);
-    if (!page || page.length === 0) {
-      await FacebookPageDao.insert(facebookPage);
-    } else {
-      await FacebookPageDao.update(facebookPage);
-    }
-
-
-    // Save post info
-    facebookPage.lstAds.forEach(async (post) => {
-      const foundPost = await FacebookAdsDao.getByPostId(post.sPostId);
-      if (!foundPost || foundPost.length === 0) {
-        await FacebookAdsDao.insert(post);
-      } else {
-        await FacebookAdsDao.update(post);
-      }
-      await FacebookAdsDao.insertStatistic(post);
-    });
-
+    const lstSimilarPages = await crawlPage(job.data.url);
+    logger.info(`[PAGE QUEUE] crawled page info: ${JSON.stringify({ lstSimilarPages: lstSimilarPages })}`);
 
     // Add similar pages to queue
-    facebookPage.lstSimilarPages.forEach(async (url) => {
+    lstSimilarPages.forEach(async (url) => {
       const username = url.split('?')[0].split('/')[3];
       const page = await FacebookPageDao.getByUsername(username);
 
@@ -48,8 +26,6 @@ pageQueue.process(config.queue.randomPageQueue.concurrency, async (job) => {
         await FacebookPageDao.insertPageUrl(url);
       }
     });
-
-    await FacebookPageDao.deletePageUrl(job.data.url);
 
     return Promise.resolve(job.data);
   } catch (e) {

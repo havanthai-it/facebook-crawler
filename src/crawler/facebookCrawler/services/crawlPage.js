@@ -146,18 +146,18 @@ const crawlPage = (url) => {
           });
 
           // GET VIDEOS
-          // let ele2a = item.querySelector('img.datstx6m.dbpd2lw6'); // Video thumbnail
-          // let ele2 = item.querySelector('video.k4urcfbm.datstx6m.a8c37x1j');
-          // let ele3 = item.querySelector('a[aria-label="Enlarge"]');
-          // let videos = [];
-          // if (ele2 && ele2a && ele3) {
-          //   images.push(ele2a.getAttribute('src'))
-          //   videos.push(ele2.getAttribute('src'));
-          //   const url = ele3.getAttribute('href').split('?')[0];
-          //   postId = url.split('/')[url.split('/').length - 1]
-          //   if (!postId) postId = url.split('/')[url.split('/').length - 2];
-          //   type = 'VIDEO';
-          // }
+          let ele2a = item.querySelector('img.datstx6m.dbpd2lw6'); // Video thumbnail
+          let ele2 = item.querySelector('video.k4urcfbm.datstx6m.a8c37x1j');
+          let ele3 = item.querySelector('a[aria-label="Enlarge"]');
+          let videos = [];
+          if (ele2 && ele2a && ele3) {
+            images.push(ele2a.getAttribute('src'))
+            videos.push(ele2.getAttribute('src'));
+            const url = ele3.getAttribute('href').split('?')[0];
+            postId = url.split('/')[url.split('/').length - 1]
+            if (!postId) postId = url.split('/')[url.split('/').length - 2];
+            type = 'VIDEO';
+          }
 
           // CLICK SEE MORE BUTTON
           let eleSeeMore = item.querySelector('div.oajrlxb2.g5ia77u1.qu0x051f.esr5mh6w.e9989ue4.r7d6kgcz.rq0escxv.nhd2j8a9.nc684nl6.p7hjln8o.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.jb3vyjys.rz4wbd8a.qt6c0cv9.a8nywdso.i1ao9s8h.esuyzwwr.f1sip0of.lzcic4wl.oo9gr5id.gpro0wi8.lrazzd5p');
@@ -340,28 +340,28 @@ const crawlPage = (url) => {
               // GET PLATFORM
               if (post.sWebsite.indexOf('amazon.com') > -1) {
                 post.sPlatform = 'amazon';
-              } else if (post.sWebsite.indexOf('bonfire.com') > -1) {
-                post.sPlatform = 'bonfire';
               } else if (post.sWebsite.indexOf('ebay.com') > -1) {
                 post.sPlatform = 'ebay';
               } else if (post.sWebsite.indexOf('etsy.com') > -1) {
                 post.sPlatform = 'etsy';
-              } else if (post.sWebsite.indexOf('printshop.com') > -1) {
-                post.sPlatform = 'printshop';
+              } else if (post.sWebsite.indexOf('gearbubble.com') > -1) {
+                post.sPlatform = 'gearbubble';
               } else if (post.sWebsite.indexOf('redbubble.com') > -1) {
                 post.sPlatform = 'redbubble';
               } else if (post.sWebsite.indexOf('spreadshirt.com') > -1) {
                 post.sPlatform = 'spreadshirt';
               } else if (post.sWebsite.indexOf('sunfrog.com') > -1) {
                 post.sPlatform = 'sunfrog';
-              } else if (post.sWebsite.indexOf('teechip.com') > -1) {
-                post.sPlatform = 'teechip';
-              } else if (post.sWebsite.indexOf('teemill.com') > -1) {
-                post.sPlatform = 'teemill';
+              } else if (post.sWebsite.indexOf('teehag.com') > -1) {
+                post.sPlatform = 'teehag';
               } else if (post.sWebsite.indexOf('teespring.com') > -1) {
                 post.sPlatform = 'teespring';
               } else if (post.sWebsite.indexOf('teepublic.com') > -1) {
                 post.sPlatform = 'teepublic';
+              } else if (post.sWebsite.indexOf('teechip.com') > -1 || document.getElementsByTagName('html')[0].innerHTML.search(/teechip/i) > -1) {
+                post.sPlatform = 'teechip';
+              } else if (post.sWebsite.indexOf('teezily.com') > -1 || document.getElementsByTagName('html')[0].innerHTML.search(/teezily/i) > -1) {
+                post.sPlatform = 'teezily';
               } else {
                 if (document.querySelector('script[src*="shopify"]')) {
                   post.sPlatform = 'shopify';
@@ -371,6 +371,18 @@ const crawlPage = (url) => {
                   post.sPlatform = 'bigcommerce';
                 } else if (document.querySelector('script[data-requiremodule*="Magento_PageBuilder"]')) {
                   post.sPlatform = 'magento';
+                } else if (document.querySelector('link[href*="https://cdn.btdmp.com/"]')) {
+                  post.sPlatform = 'shopbase';
+                } else if (document.getElementsByTagName('html')[0].innerHTML.search(/teemill/i) > -1) {
+                  post.sPlatform = 'teemill';
+                } else if (document.getElementsByTagName('html')[0].innerHTML.search(/gearlaunch/i) > -1) {
+                  post.sPlatform = 'gearlaunch';
+                } else if (document.getElementsByTagName('html')[0].innerHTML.search(/merchize/i) > -1) {
+                  post.sPlatform = 'merchize';
+                } else if (document.getElementsByTagName('html')[0].innerHTML.search(/hostingrocket/i) > -1) {
+                  post.sPlatform = 'hostingrocket';
+                } else if (document.querySelector('link[href*="proui/"]') && document.querySelector('script[src*="proui/"]')) {
+                  post.sPlatform = 'merchking';
                 }
               }
 

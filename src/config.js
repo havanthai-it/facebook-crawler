@@ -28,7 +28,15 @@ const config = {
     },
     urlPageQueue: {
       concurrency: 2
+    },
+    seedingKeywordQueue: {
+      concurrency: 1
     }
+  },
+  space: {
+    endpoint: 'sfo2.digitaloceanspaces.com',
+    accessKeyId: 'HYPAVLNO5FHC4525HWSK',
+    secretAccessKey: 'qXg8YhKU5C+/7MOLCGHqYOpW010hcymEXKsEJqH7JSk'
   }
 }
 
