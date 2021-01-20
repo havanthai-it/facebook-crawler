@@ -7,7 +7,7 @@ class FacebookCrawler {
   }
 
   static async start() {
-    const url = 'https://www.facebook.com/Amazing-Gifts-105234424840724/';
+    const url = 'https://www.facebook.com/I-Love-My-Dutch-Heritage-1609602922608502';
     pageQueue.add({ url: url });
   }
 

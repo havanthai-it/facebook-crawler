@@ -22,22 +22,26 @@ const crawlUrlPage = async () => {
         await sleep(5000);
 
         await page.$eval('input[name="email"]', el => el.value = 'havanthaicvp@gmail.com');
-        await page.$eval('input[name="pass"]', el => el.value = 'Dreadsteed@000');
+        await page.$eval('input[name="pass"]', el => el.value = 'Dreadsteed@001');
         await page.click('button[name="login"]');
         await sleep(5000);
         await page.waitForSelector('div[role="main"]');
         logger.info(`[CRAWL URL PAGE] Login successfully`);
 
-        let listPageUrl = await FacebookPageDao.listPageUrl(1000);
-        if (listPageUrl && Array.isArray(listPageUrl)) {
-          listPageUrl.forEach(url => {
-            urlPageQueue.add({
-              url: url.s_url
+        urlPageQueue.empty().then(async () => {
+          let listPageUrl = await FacebookPageDao.listPageUrl(1000);
+          if (listPageUrl && Array.isArray(listPageUrl)) {
+            listPageUrl.forEach(url => {
+              urlPageQueue.add({
+                url: url.s_url
+              });
             });
-          });
-        }
+          }
+        }).catch(e => {
+          logger.error(`[CRAWL URL PAGE] Error while add page url to urlPageQueue: ${e}`);
+        });
       } catch (e) {
-        logger.info(`[CRAWL URL PAGE] Already login or there are some errors occured: ${e}`);
+        logger.error(`[CRAWL URL PAGE] Already login or there are some errors occured: ${e}`);
       }
     });
 

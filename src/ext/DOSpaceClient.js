@@ -11,32 +11,41 @@ class DOSpaceClient {
 
   /**
    * 
-   * @param {string} filePath 
    * @param {string} fileName 
-   * @returns {string} url
+   * @return {string} url
    */
-  static uploadImage(fileName, callback) {
-    const arr = fileName.split('/');
-    const fileNewName = moment().format('yyyyMMddHHmmss') + randomString(4) + arr[arr.length - 1];
-    // Configure client for use with Spaces
-    const s3 = new AWS.S3({
-      endpoint: new AWS.Endpoint(config.space.endpoint),
-      accessKeyId: config.space.accessKeyId,
-      secretAccessKey: config.space.secretAccessKey
-    });
+  static uploadImage(fileName) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const arr = fileName.split('/');
+        const fileNewName = moment(new Date()).format('YYYYMMDDHHmmss') + '_' + arr[arr.length - 1];
+        // Configure client for use with Spaces
+        const s3 = new AWS.S3({
+          endpoint: new AWS.Endpoint(config.space.endpoint),
+          accessKeyId: config.space.accessKeyId,
+          secretAccessKey: config.space.secretAccessKey
+        });
 
-    fs.readFile(fileName, function(err, fileData) {
-      const params = {
-        Bucket: "hvtspace", 
-        Key: 'fbspy/images/' + fileNewName, 
-        Body: fileData,
-        ContentType: DOSpaceClient.getImageContentType(fileNewName),
-        ACL: 'public-read'
-      };
-      s3.putObject(params, function(err, data) {
-        logger.info('[DIGITAL OCEAN SPACE CLIENT] Uploaded file: ' + fileName);
-        callback(err, data);
-      });
+        fs.readFile(fileName, function(err, fileData) {
+          const params = {
+            Bucket: "hvtspace", 
+            Key: 'fbspy/images/' + fileNewName, 
+            Body: fileData,
+            ContentType: DOSpaceClient.getImageContentType(fileNewName),
+            ACL: 'public-read'
+          };
+          s3.putObject(params, function(err, data) {
+            logger.info('[DIGITAL OCEAN SPACE CLIENT] Uploaded file: ' + fileName);
+            if (err) {
+              return reject(err);
+            }
+
+            return resolve('https://hvtspace.sfo2.digitaloceanspaces.com/fbspy/images/' + fileNewName);
+          });
+        });
+      } catch (e) {
+        return reject(e);
+      }
     });
   }
 
@@ -61,8 +70,13 @@ class DOSpaceClient {
     }
     return contentType;
   }
+
+  static async test() {
+    let url = await DOSpaceClient.uploadImage('D:/workspace/WEB/PROJECTS/crawler/temp/abc.jpg');
+    console.log('url=' + url);
+  }
 }
 
-DOSpaceClient.uploadImage('D:/workspace/WEB/PROJECTS/crawler/temp/abc.jpg', (err, data) => console.log(data));
+// DOSpaceClient.test();
 
 module.exports = DOSpaceClient;

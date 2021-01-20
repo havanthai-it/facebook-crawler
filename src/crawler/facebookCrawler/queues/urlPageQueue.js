@@ -20,6 +20,7 @@ adsPageQueue.process(config.queue.adsPageQueue.concurrency, async (job) => {
     const username = job.data.url.split('?')[0].split('/')[3];
     const foundPage = await FacebookPageDao.getByUsername(username);
     if (foundPage && foundPage.length) {
+      logger.info(`[URL PAGE QUEUE] This page was already crawled: ${JSON.stringify(job.data.url)}`);
       return Promise.reject(`[URL PAGE QUEUE] This page ${job.data.url} was already crawled`);
     }
 
@@ -42,6 +43,19 @@ adsPageQueue.process(config.queue.adsPageQueue.concurrency, async (job) => {
         await FacebookAdsDao.update(post);
       }
       await FacebookAdsDao.insertStatistic(post);
+    });
+
+    // Save similar pages
+    facebookPage.lstSimilarPages.forEach(async (url) => {
+      const username = url.split('?')[0].split('/')[3];
+      const page = await FacebookPageDao.getByUsername(username);
+
+      // Add page url to queue if page is not crawled yet
+      if (!page || page.length === 0) {
+        url = url.split('?')[0];
+        logger.info(`[URL PAGE QUEUE] SAVED ${url}`);
+        await FacebookPageDao.insertPageUrl(url);
+      }
     });
 
     await FacebookPageDao.deletePageUrl(job.data.url);

@@ -3,9 +3,13 @@ const moment = require('moment');
 const logger = require('../../../utils/logger');
 const Browser = require('../../../utils/Browser');
 const sleep = require('../../../utils/funcs/sleep');
+const randomString = require('../../../utils/funcs/randomString');
 const FacebookPage = require('../../../models/FacebookPage');
 const FacebookPageDao = require('../../../dao/FacebookPageDao');
 const DateUtils = require('../../../utils/DateUtils');
+const FileUtils = require('../../../utils/FileUtils');
+const DOSpaceClient = require('../../../ext/DOSpaceClient');
+const config = require('../../../config');
 
 /**
  * @param {string} url 
@@ -104,20 +108,21 @@ const crawlPage = (url) => {
 
         return result;
       });
+
       /* END GET PAGE INFORMATION */
 
 
       /* START GET SIMILAR PAGE */
-      // facebookPage.lstSimilarPages = await page0.evaluate(() => {
-      //   let result = [];
-      //   let items = document.querySelectorAll('#pages_side_column ul.uiList > li._4-lt');
-      //   items.forEach(item => {
-      //     const el0 = item.querySelector('a._4-lu');
-      //     result.push(el0 ? el0.getAttribute('href') : '');
-      //   });
+      facebookPage.lstSimilarPages = await page0.evaluate(() => {
+        let result = [];
+        let items = document.querySelectorAll('div.b20td4e0.muag1w35 div.ue3kfks5.pw54ja7n.uo3d90p7.l82x9zwi.a8c37x1j');
+        items.forEach(item => {
+          const el0 = item.querySelector('a');
+          result.push(el0 ? el0.getAttribute('href') : '');
+        });
 
-      //   return result;
-      // });
+        return result;
+      });
       /* END GET SIMILAR PAGE */
 
 
@@ -192,16 +197,26 @@ const crawlPage = (url) => {
           // GET VIEWS
 
           // GET LINKS
-          let ele8 = ele4 ? ele4.querySelectorAll('a.oajrlxb2.g5ia77u1.qu0x051f.esr5mh6w.e9989ue4.r7d6kgcz.rq0escxv.nhd2j8a9.nc684nl6.p7hjln8o.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.jb3vyjys.rz4wbd8a.qt6c0cv9.a8nywdso.i1ao9s8h.esuyzwwr.f1sip0of.lzcic4wl.py34i1dx.gpro0wi8') : [];
           let links = [];
-          ele8.forEach(a => {
-            let href = a.getAttribute('href'); // Sample: https://l.facebook.com/l.php?u=http%3A%2F%2Faothunjapan.com%2F%3Ffbclid%3DIwAR05Yh4k2-ZQh4xJoHBJCUarT-wvBILkEWmlX_LTorIJMgPF8y1obeMum24&h=AT1IfT4SMOt914SMODAQ1cuOetgvN2-xcnfy2OIbRnuT0BydfKXK7_liJacWx3B7O1BOWDi1ekBi0tNt9BYxGDv0KkhWgkATc1tyri_oP4QBJoIv-fwTR9d7649gc_8m58ek&__tn__=-UK-R&c[0]=AT1SP6jU-MwhOg6oScYISIkgd9cLxrRc07P7EJ6Ijbu3L8-caTCMhB_K3N-AHSVa4ahEvf1XpFCEDunGiVUzJm4Ph8DsynhxZfMrHHQckkbgJ983sfPFS6l4BtIVjQskVJEBP8ZGs_vXIF6xrW3scu8jJat_L_6skoWIbe2JY0aTcA
+          // Links in action block
+          let ele80 = item.querySelector('div.l9j0dhe7.j83agx80.i1fnvgqd.bp9cbjyn.btwxx1t3.hv4rvrfc.dati1w0a');
+          let a80 = ele80 ? ele80.querySelector('div.j83agx80.cbu4d94t.taijpn5t.up7ckamt a') : '';
+          if (a80) {
+            let href = a80.getAttribute('href'); // Sample: https://l.facebook.com/l.php?u=https%3A%2F%2Frebrand.ly%2Fmaybedutch%3Ffbclid%3DIwAR3IDs3_Pzn_ReuBL_Bx75rDYnhgEwqFRBeMfsffBN7yfO-lglFiYSJakug&h=AT3PUeUZrajL98F6kquGt53pj5ly0OG52OwRpSFzyPOnQy08Atz1S93A8iBGI4gkjYeynXgdu9REyQw0vmdWMWpkCGfM-Uu0vQ591PkwRu7bq6vInebRKEcUiE6GqRWZZJjEPw&__tn__=*J%2CmH-R&c[0]=AT1zYyLPJIROxZGGAzJtL4Ql2wiA-4-QOjvo-3etE73bQZvacEr1c25FCkW0vT4YVonmaq7CmtNhngt7nt34SMLGuggbN-cLM13wylUXa2c5Yr211s6cTDJOw4bIotBv-OrpvI_-AllYZq4VYcYGY_t2z_7U-e5BfWpvxQyxysgvttM
             let params = new URLSearchParams(href.split('?')[1]);
             let link = params.get('u') ? params.get('u').split('?')[0] : '';
-            if (link && links.indexOf(link) === -1) links.push(link);
-          });
-          if (links.length !== 1) return; // Ignore post that don't have any links or have multiple links
-
+            if (link && links.length === 0) links.push(link);
+          } else {
+            // Links in post content
+            let ele8 = ele4 ? ele4.querySelectorAll('a.oajrlxb2.g5ia77u1.qu0x051f.esr5mh6w.e9989ue4.r7d6kgcz.rq0escxv.nhd2j8a9.nc684nl6.p7hjln8o.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.jb3vyjys.rz4wbd8a.qt6c0cv9.a8nywdso.i1ao9s8h.esuyzwwr.f1sip0of.lzcic4wl.py34i1dx.gpro0wi8') : [];
+            ele8.forEach(a => {
+              let href = a.getAttribute('href'); // Sample: https://l.facebook.com/l.php?u=http%3A%2F%2Faothunjapan.com%2F%3Ffbclid%3DIwAR05Yh4k2-ZQh4xJoHBJCUarT-wvBILkEWmlX_LTorIJMgPF8y1obeMum24&h=AT1IfT4SMOt914SMODAQ1cuOetgvN2-xcnfy2OIbRnuT0BydfKXK7_liJacWx3B7O1BOWDi1ekBi0tNt9BYxGDv0KkhWgkATc1tyri_oP4QBJoIv-fwTR9d7649gc_8m58ek&__tn__=-UK-R&c[0]=AT1SP6jU-MwhOg6oScYISIkgd9cLxrRc07P7EJ6Ijbu3L8-caTCMhB_K3N-AHSVa4ahEvf1XpFCEDunGiVUzJm4Ph8DsynhxZfMrHHQckkbgJ983sfPFS6l4BtIVjQskVJEBP8ZGs_vXIF6xrW3scu8jJat_L_6skoWIbe2JY0aTcA
+              let params = new URLSearchParams(href.split('?')[1]);
+              let link = params.get('u') ? params.get('u').split('?')[0] : '';
+              if (link && links.length === 0) links.push(link);
+            });
+          }
+          
           // GET PUBLISHED DATE
           const now = new Date();
           let ele9 = item.querySelector('.j1lvzwm4.stjgntxs.ni8dbmo4.q9uorilb.gpro0wi8');
@@ -391,6 +406,16 @@ const crawlPage = (url) => {
             /* END GO TO WEBSITE */
 
             if (newPost.sPixelId && newPost.sPlatform) {
+              // upload image to digital ocean space
+              let newImages = [];
+              let arr = newPost.sImages.split(',');
+              for (let postImage of arr) {
+                const newPostImage = await FileUtils.download(postImage, config.file.downloadPath + 'post_' + randomString(8) + FileUtils.getImageExtension(postImage));
+                newImages.push(await DOSpaceClient.uploadImage(newPostImage));
+                await FileUtils.delete(newPostImage);
+              };
+              newPost.sImages = newImages.join();
+
               facebookPage.lstAds.push(newPost);
             }
           } catch (e) {
@@ -405,6 +430,11 @@ const crawlPage = (url) => {
       // SET HASADS
       if (facebookPage.lstAds.length > 0) {
         facebookPage.nHasAds = 1;
+        
+        // upload image to digital ocean space
+        const newPageImage = await FileUtils.download(facebookPage.sThumbnail, config.file.downloadPath + 'page_' + randomString(8) + FileUtils.getImageExtension(facebookPage.sThumbnail));
+        facebookPage.sThumbnail = await DOSpaceClient.uploadImage(newPageImage);
+        await FileUtils.delete(newPageImage);
       } else {
         facebookPage.nHasAds = 0;
       }

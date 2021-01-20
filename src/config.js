@@ -21,13 +21,13 @@ const config = {
   },
   queue: {
     randomPageQueue: {
-      concurrency: 1
+      concurrency: 2
     },
     adsPageQueue: {
       concurrency: 2
     },
     urlPageQueue: {
-      concurrency: 2
+      concurrency: 1
     },
     seedingKeywordQueue: {
       concurrency: 1
@@ -37,6 +37,15 @@ const config = {
     endpoint: 'sfo2.digitaloceanspaces.com',
     accessKeyId: 'HYPAVLNO5FHC4525HWSK',
     secretAccessKey: 'qXg8YhKU5C+/7MOLCGHqYOpW010hcymEXKsEJqH7JSk'
+  },
+  file: {
+    downloadPath: 'D:/workspace/WEB/PROJECTS/crawler/temp/'
+  },
+  account: {
+    facebook: {
+      email: 'havanthaicvp@gmail.com',
+      password: 'Dreadsteed@001'
+    }
   }
 }
 
