@@ -327,7 +327,7 @@ const crawlPage = (url) => {
           const url1 = post.sLinks.split(',')[0];
           
           const page1 = await Browser.instance.newPage();
-          await page1.setDefaultNavigationTimeout(60000);
+          await page1.setDefaultNavigationTimeout(30000);
           await page1.setViewport({ width: 1920, height: 1080 });
 
           try {
@@ -422,6 +422,7 @@ const crawlPage = (url) => {
             logger.error(`[CRAWL ADS] Can not get response ${url1} ${e}`);
           }
 
+          // Close page
           if (page1) await page1.close();
         }
         

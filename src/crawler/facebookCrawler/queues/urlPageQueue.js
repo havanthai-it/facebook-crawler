@@ -7,8 +7,8 @@ const FacebookPageDao = require('../../../dao/FacebookPageDao');
 const FacebookAdsDao = require('../../../dao/FacebookAdsDao');
 const crawlPage = require('../services/crawlPage');
 
-const adsPageQueue = new Queue('urlPageQueue', 'redis://127.0.0.1:6379');
-adsPageQueue.process(config.queue.adsPageQueue.concurrency, async (job) => {
+const urlPageQueue = new Queue('urlPageQueue', 'redis://127.0.0.1:6379');
+urlPageQueue.process(config.queue.urlPageQueue.concurrency, async (job) => {
   try {
     if (!Browser.instance) {
       await sleep(60000);
@@ -64,8 +64,8 @@ adsPageQueue.process(config.queue.adsPageQueue.concurrency, async (job) => {
   } catch (e) {
     logger.error(`[URL PAGE QUEUE] ${e}`);
     await FacebookPageDao.deletePageUrl(job.data.url);
-    return Promise.reject(e);
+    return Promise.resolve(e);
   }
 });
 
-module.exports = adsPageQueue;
+module.exports = urlPageQueue;
