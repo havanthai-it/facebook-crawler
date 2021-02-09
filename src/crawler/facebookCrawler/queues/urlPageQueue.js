@@ -21,6 +21,7 @@ urlPageQueue.process(config.queue.urlPageQueue.concurrency, async (job) => {
     const foundPage = await FacebookPageDao.getByUsername(username);
     if (foundPage && foundPage.length) {
       logger.info(`[URL PAGE QUEUE] This page was already crawled: ${JSON.stringify(job.data.url)}`);
+      await FacebookPageDao.deletePageUrl(job.data.url);
       return Promise.reject(`[URL PAGE QUEUE] This page ${job.data.url} was already crawled`);
     }
 

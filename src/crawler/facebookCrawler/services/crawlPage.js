@@ -324,14 +324,14 @@ const crawlPage = (url) => {
         for (const post of lstAds) {
 
           /* START GO TO WEBSITE */
-          const url1 = post.sLinks.split(',')[0];
+          let url1 = post.sLinks.split(',')[0];
           
-          const page1 = await Browser.instance.newPage();
-          await page1.setDefaultNavigationTimeout(30000);
-          await page1.setViewport({ width: 1920, height: 1080 });
+          let page1 = null;
 
           try {
-            await page1.goto(url1);
+            page1 = await Browser.instance.newPage();
+            await page1.setViewport({ width: 1920, height: 1080 });
+            await page1.goto(url1, { waitUntil: 'networkidle0' });
             await page1.waitForSelector('body');
             await sleep(5000);
 
@@ -420,10 +420,13 @@ const crawlPage = (url) => {
             }
           } catch (e) {
             logger.error(`[CRAWL ADS] Can not get response ${url1} ${e}`);
+            logger.error(e.stack);
           }
 
           // Close page
-          if (page1) await page1.close();
+          if (page1) {
+            await page1.close();
+          }
         }
         
       }

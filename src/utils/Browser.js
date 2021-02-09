@@ -7,7 +7,7 @@ class Browser {
 
   static async init(callback) {
     Browser.instance = await puppeteer.launch({ 
-      headless: true,
+      headless: false,
       args: [
         '--disable-gpu',
         '--no-sandbox',

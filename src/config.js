@@ -8,10 +8,10 @@ const config = {
   },
   database: {
     host: '127.0.0.1',
-    port: 3306,
-    user: 'root',
-    password: '',
-    database: 'ultimatespy',
+    port: 6606,
+    user: 'adscrawlr',
+    password: 'adscrawlr',
+    database: 'adscrawlr',
     charset: 'utf8mb4_general_ci',
     connectionLimit: 100,
     connectTimeout: 15000,
@@ -27,7 +27,7 @@ const config = {
       concurrency: 2
     },
     urlPageQueue: {
-      concurrency: 3
+      concurrency: 2
     },
     seedingKeywordQueue: {
       concurrency: 1
