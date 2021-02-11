@@ -17,14 +17,21 @@ postQueue.process(config.queue.postQueue.concurrency, async (job) => {
 
     // Check whether or not this page was crawled
     const facebookPost = await crawlPost(job.data.url);
+    facebookPost.sPostId = job.data.postId;
+    facebookPost.sFacebookPageUsername = job.data.facebookPageUsername;
     logger.info(`[POST QUEUE] crawled post info: ${JSON.stringify(facebookPost)}`);
 
     // Save post info
     const foundPost = await FacebookAdsDao.getByPostId(facebookPost.sPostId);
-    if (!foundPost || foundPost.length === 0) {
-      await FacebookAdsDao.insert(facebookPost);
-    } else {
-      await FacebookAdsDao.update(facebookPost);
+    if (foundPost && foundPost.length > 0) {
+      await FacebookAdsDao.updatePostStatistic(facebookPost);
+      if (foundPost[0].n_likes === facebookPost.nLikes
+        && foundPost[0].n_comments === facebookPost.n_comments
+        && foundPost[0].n_shares === facebookPost.n_shares
+        && foundPost[0].n_views === facebookPost.n_views) {
+          // Update n_should_crawl = 0
+          await FacebookAdsDao.updateUserPost(facebookPost.sPostId, 0);
+      }
     }
     await FacebookAdsDao.insertStatistic(facebookPost);
 

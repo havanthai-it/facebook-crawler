@@ -131,6 +131,31 @@ class FacebookAdsDao {
   }
 
   /**
+   * @param {FacebookPost} facebookAds
+   * @returns {boolean}
+   */
+  static async updatePostStatistic(facebookAds) {
+    const query = "UPDATE tb_facebook_post SET "
+      + " n_likes = ?, "
+      + " n_comments = ?, "
+      + " n_shares = ?, "
+      + " n_views = ?, "
+      + " d_update = ? "
+      + " WHERE s_post_id = ? AND s_facebook_page_username = ? ";
+    const params = [
+      facebookAds.nLikes ? parseInt(facebookAds.nLikes + '') : 0,
+      facebookAds.nComments ? parseInt(facebookAds.nComments + '') : 0,
+      facebookAds.nShares ? parseInt(facebookAds.nShares + '') : 0,
+      facebookAds.nViews ? parseInt(facebookAds.nViews + '') : 0,
+      moment(Date.now()).tz('America/Los_Angeles').format('YYYY-MM-DD HH:mm:ss'),
+      facebookAds.sPostId,
+      facebookAds.sFacebookPageUsername
+    ];
+    const result = await poolConnection.query(query, params);
+    return result;
+  }
+
+  /**
    * @param {string} id 
    * @param {string} status 
    */
@@ -173,10 +198,41 @@ class FacebookAdsDao {
    * @param {number} fetchSize
    */
   static async listTrackedPost(fetchSize) {
-    const query = "SELECT * "
-      + " FROM tb_user_post "
-      + " WHERE s_type = 'tracked'";
-    const result = await poolConnection.query(query, [id]);
+    const query = "SELECT " 
+      + "   tfp.s_post_id, " 
+      + "   tfp.s_facebook_page_username, " 
+      + "   tfp.n_likes, " 
+      + "   tfp.n_comments, " 
+      + "   tfp.n_shares, " 
+      + "   tfp.n_views " 
+      + " FROM tb_user_post tup  " 
+      + " INNER JOIN tb_facebook_post tfp ON tup.s_facebook_post_id = tfp.s_post_id  " 
+      + " WHERE tup.s_type = 'tracked' " 
+      + "   AND tup.n_should_crawl = 1 " 
+      + "   AND tfp.d_update < CURDATE() " 
+      + " GROUP BY " 
+      + "   tfp.s_post_id, " 
+      + "   tfp.s_facebook_page_username, " 
+      + "   tfp.n_likes, " 
+      + "   tfp.n_comments, " 
+      + "   tfp.n_shares, " 
+      + "   tfp.n_views " 
+      + " LIMIT ? "
+    ;
+    const result = await poolConnection.query(query, [fetchSize]);
+    return result;
+  }
+
+  /**
+   * @param {string} postId 
+   * @param {number} shouldCrawl 
+   */
+  static async updateUserPost(postId, shouldCrawl) {
+    const query = "UPDATE tb_user_post SET "
+      + " n_should_crawl = ? "
+      + " WHERE s_facebook_post_id = ? ";
+    const params = [postId, shouldCrawl];
+    const result = await poolConnection.query(query, params); 
     return result;
   }
 

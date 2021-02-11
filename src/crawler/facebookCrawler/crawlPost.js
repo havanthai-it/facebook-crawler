@@ -5,7 +5,7 @@ const postQueue = require('./queues/postQueue');
 const FacebookAdsDao = require('../../dao/FacebookAdsDao');
 const sleep = require('../../utils/funcs/sleep');
 
-const crawlUrlPage = async () => {
+const crawlPost = async () => {
 
   try {
     
@@ -33,12 +33,14 @@ const crawlUrlPage = async () => {
           if (listPost && Array.isArray(listPost)) {
             listPost.forEach(p => {
               postQueue.add({
-                url:`https://facebook.com/${p.sFacebookPageUsername}/posts/${p.sPostId}`
+                postId: p.s_post_id,
+                facebookPageUsername: p.s_facebook_page_username,
+                url:`https://facebook.com/${p.s_facebook_page_username}/posts/${p.s_post_id}`
               });
             });
           }
         }).catch(e => {
-          logger.error(`[CRAWL POST] Error while add page url to urlPageQueue: ${e}`);
+          logger.error(`[CRAWL POST] Error while add page url to postQueue: ${e}`);
         });
       } catch (e) {
         logger.error(`[CRAWL POST] Already login or there are some errors occured: ${e}`);
@@ -46,10 +48,10 @@ const crawlUrlPage = async () => {
     });
 
   } catch (e) {
-    logger.error(`[CRAWL URL PAGE] ${e}`);
+    logger.error(`[CRAWL POST] ${e}`);
     return;
   }
   
 }
 
-crawlUrlPage();
+crawlPost();
