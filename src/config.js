@@ -21,13 +21,13 @@ const config = {
   },
   queue: {
     randomPageQueue: {
-      concurrency: 2
+      concurrency: 1
     },
     adsPageQueue: {
-      concurrency: 2
+      concurrency: 1
     },
     urlPageQueue: {
-      concurrency: 2
+      concurrency: 1
     },
     seedingKeywordQueue: {
       concurrency: 1

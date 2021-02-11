@@ -218,7 +218,6 @@ const crawlPage = (url) => {
           }
           
           // GET PUBLISHED DATE
-          const now = new Date();
           let ele9 = item.querySelector('.j1lvzwm4.stjgntxs.ni8dbmo4.q9uorilb.gpro0wi8');
           if (!ele9) return;
           let eleJunk = ele9.querySelectorAll('span.b6zbclly.myohyog2.l9j0dhe7.aenfhxwr.l94mrbxd.ihxqhq3m.nc684nl6.t5a262vz.sdhka5h4');
@@ -227,7 +226,10 @@ const crawlPage = (url) => {
               i.parentNode.removeChild(i);
             }
           });
-
+          
+          const now = new Date();
+          const yesterday = new Date();
+          yesterday.setDate(now.getDate() - 1);
           let rawDatetime = ele9.innerText.trim();
           let datetime = '';
           let tempDatetime = '';
@@ -264,15 +266,20 @@ const crawlPage = (url) => {
               datetime = datetime + ' ' + '00:00:00';
             }
           } else {
+            let todayDateStr = ('00' + (now.getUTCMonth() + 1)).substr(-2) + ' ' + ('00' + now.getUTCDate()).substr(-2);
+            let yesterdayDateStr = ('00' + (yesterday.getUTCMonth() + 1)).substr(-2) + ' ' + ('00' + yesterday.getUTCDate()).substr(-2);
+            rawDatetime = rawDatetime.replace('Today', todayDateStr); // Today at 6:30 PM
+            rawDatetime = rawDatetime.replace('Yesterday', yesterdayDateStr); // Yesterday at 6:30 PM
+            
             let hasTime = true;
-            if (rawDatetime.indexOf('at') > -1 && rawDatetime.indexOf(',') > -1) {
+            if (rawDatetime.indexOf('at') > -1 && rawDatetime.indexOf(',') > -1) { // June 11, 2020 at 6:30 PM
               tempDatetime = rawDatetime.replace('at', '').replace(',', '').replace(/\s\s+/g, ' ').replace(/\s/g, ' ');
-            } else if (rawDatetime.indexOf('at') > -1 && rawDatetime.indexOf(',') === -1) {
+            } else if (rawDatetime.indexOf('at') > -1 && rawDatetime.indexOf(',') === -1) { // June 11 at 6:30 PM
               tempDatetime = rawDatetime.replace('at', now.getUTCFullYear()).replace(/\s/g, ' ');
-            } else if (rawDatetime.indexOf('at') === -1 && rawDatetime.indexOf(',') > -1) {
+            } else if (rawDatetime.indexOf('at') === -1 && rawDatetime.indexOf(',') > -1) { // June 11, 2020 
               tempDatetime = rawDatetime.replace(',', '').replace(/\s/g, ' ');
               hasTime = false;
-            } else if (rawDatetime.indexOf('at') === -1 && rawDatetime.indexOf(',') === -1) {
+            } else if (rawDatetime.indexOf('at') === -1 && rawDatetime.indexOf(',') === -1) { // June 11
               tempDatetime = (rawDatetime + ' ' + now.getUTCFullYear()).replace(/\s/g, ' ');
               hasTime = false;
             }
@@ -406,7 +413,7 @@ const crawlPage = (url) => {
             /* END GO TO WEBSITE */
 
             if (newPost.sPixelId && newPost.sPlatform) {
-              // upload image to digital ocean space
+              // upload post image to digital ocean space
               let newImages = [];
               let arr = newPost.sImages.split(',');
               for (let postImage of arr) {
@@ -425,7 +432,9 @@ const crawlPage = (url) => {
 
           // Close page
           if (page1) {
-            await page1.close();
+            logger.info(`[CRAWL ADS] Closing page...`);
+            await page1.close({ runBeforeUnload: true });
+            logger.info(`[CRAWL ADS] Page closed.`);
           }
         }
         

@@ -22,20 +22,24 @@ const crawlAdsPage = async () => {
         await sleep(5000);
 
         await page.$eval('input[name="email"]', el => el.value = 'havanthaicvp@gmail.com');
-        await page.$eval('input[name="pass"]', el => el.value = 'Dreadsteed@000');
+        await page.$eval('input[name="pass"]', el => el.value = 'Dreadsteed@001');
         await page.click('button[name="login"]');
         await sleep(5000);
         await page.waitForSelector('div[role="main"]');
         logger.info(`[CRAWL ADS PAGE] Login successfully`);
 
-        let listPage = await FacebookPageDao.list(1, 1000);
-        if (listPage && Array.isArray(listPage)) {
-          listPage.forEach(page => {
-            adsPageQueue.add({
-              url: `https://www.facebook.com/${page.s_username}/`
+        adsPageQueue.empty().then(async () => {
+          let listPage = await FacebookPageDao.list(1, 3, 1000);
+          if (listPage && Array.isArray(listPage)) {
+            listPage.forEach(page => {
+              adsPageQueue.add({
+                url: `https://www.facebook.com/${page.s_username}/`
+              });
             });
-          });
-        }
+          }
+        }).catch(e => {
+          logger.error(`[CRAWL ADS PAGE] Error while add page url to adsPageQueue: ${e}`);
+        });
       } catch (e) {
         logger.info(`[CRAWL ADS PAGE] Already login or there are some errors occured: ${e}`);
       }

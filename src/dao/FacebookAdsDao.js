@@ -78,7 +78,7 @@ class FacebookAdsDao {
       facebookAds.sLinks,
       facebookAds.sWebsite,
       facebookAds.sPlatform,
-      facebookAds.dPublish
+      moment(facebookAds.dPublish).tz('America/Los_Angeles').format('YYYY-MM-DD HH:mm:ss')
     ];
     const result = await poolConnection.query(query, params);
     return result;
@@ -123,7 +123,7 @@ class FacebookAdsDao {
       facebookAds.sLinks,
       facebookAds.sWebsite,
       facebookAds.sPlatform,
-      moment(Date.now()).format('YYYY-MM-DD HH:mm:ss'),
+      moment(Date.now()).tz('America/Los_Angeles').format('YYYY-MM-DD HH:mm:ss'),
       facebookAds.sId,
     ];
     const result = await poolConnection.query(query, params);
@@ -139,7 +139,7 @@ class FacebookAdsDao {
       + " s_status = ?, "
       + " d_update = ? "
       + " WHERE s_id = ? ";
-    const params = [status, moment(Date.now()).format('YYYY-MM-DD HH:mm:ss'), id];
+    const params = [status, moment(Date.now()).tz('America/Los_Angeles').format('YYYY-MM-DD HH:mm:ss'), id];
     const result = await poolConnection.query(query, params); 
     return result;
   }

@@ -32,11 +32,14 @@ class FacebookPageDao {
   /**
    * 
    * @param {number} hasAds 
+   * @param {number} days 
    * @param {number} fetchSize 
    */
-  static async list(hasAds, fetchSize) {
-    const query = "SELECT * FROM tb_facebook_page WHERE n_has_ads = ? ORDER BY d_last_crawl ASC LIMIT ?";
-    const result = await poolConnection.query(query, [hasAds, fetchSize]);
+  static async list(hasAds, days, fetchSize) {
+    const query = "SELECT * FROM tb_facebook_page " 
+      + " WHERE n_has_ads = ? AND d_last_crawl < DATE_SUB(CURRENT_TIMESTAMP(), INTERVAL ? DAY) " 
+      + " ORDER BY d_last_crawl ASC LIMIT ?";
+    const result = await poolConnection.query(query, [hasAds, days, fetchSize]);
     return result;
   }
 
