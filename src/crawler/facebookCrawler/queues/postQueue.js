@@ -42,4 +42,4 @@ postQueue.process(config.queue.postQueue.concurrency, async (job) => {
   }
 });
 
-module.exports = urlPageQueue;
+module.exports = postQueue;

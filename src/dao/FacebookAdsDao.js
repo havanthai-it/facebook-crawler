@@ -78,7 +78,7 @@ class FacebookAdsDao {
       facebookAds.sLinks,
       facebookAds.sWebsite,
       facebookAds.sPlatform,
-      moment(facebookAds.dPublish).tz('America/Los_Angeles').format('YYYY-MM-DD HH:mm:ss')
+      moment(facebookAds.dPublish).utc().format('YYYY-MM-DD HH:mm:ss')
     ];
     const result = await poolConnection.query(query, params);
     return result;
@@ -123,7 +123,7 @@ class FacebookAdsDao {
       facebookAds.sLinks,
       facebookAds.sWebsite,
       facebookAds.sPlatform,
-      moment(Date.now()).tz('America/Los_Angeles').format('YYYY-MM-DD HH:mm:ss'),
+      moment(Date.now()).utc().format('YYYY-MM-DD HH:mm:ss'),
       facebookAds.sId,
     ];
     const result = await poolConnection.query(query, params);
@@ -147,7 +147,7 @@ class FacebookAdsDao {
       facebookAds.nComments ? parseInt(facebookAds.nComments + '') : 0,
       facebookAds.nShares ? parseInt(facebookAds.nShares + '') : 0,
       facebookAds.nViews ? parseInt(facebookAds.nViews + '') : 0,
-      moment(Date.now()).tz('America/Los_Angeles').format('YYYY-MM-DD HH:mm:ss'),
+      moment(Date.now()).utc().format('YYYY-MM-DD HH:mm:ss'),
       facebookAds.sPostId,
       facebookAds.sFacebookPageUsername
     ];
@@ -164,7 +164,7 @@ class FacebookAdsDao {
       + " s_status = ?, "
       + " d_update = ? "
       + " WHERE s_id = ? ";
-    const params = [status, moment(Date.now()).tz('America/Los_Angeles').format('YYYY-MM-DD HH:mm:ss'), id];
+    const params = [status, moment(Date.now()).utc().format('YYYY-MM-DD HH:mm:ss'), id];
     const result = await poolConnection.query(query, params); 
     return result;
   }

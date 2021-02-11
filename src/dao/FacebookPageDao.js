@@ -105,8 +105,8 @@ class FacebookPageDao {
       facebookPage.nHasAds,
       facebookPage.nLikes ? parseInt(facebookPage.nLikes + '') : 0,
       facebookPage.nFollows ? parseInt(facebookPage.nFollows + '') : 0,
-      moment(Date.now()).tz('America/Los_Angeles').format('YYYY-MM-DD HH:mm:ss'),
-      moment(Date.now()).tz('America/Los_Angeles').format('YYYY-MM-DD HH:mm:ss'),
+      moment(Date.now()).utc().format('YYYY-MM-DD HH:mm:ss'),
+      moment(Date.now()).utc().format('YYYY-MM-DD HH:mm:ss'),
       facebookPage.sUsername,
     ];
     logger.info("[FACEBOOK PAGE DAO] Update params=" + params.toString());
@@ -123,7 +123,7 @@ class FacebookPageDao {
       + " s_status = ?, "
       + " d_update = ? "
       + " WHERE s_id = ? ";
-    const params = [status, moment(Date.now()).tz('America/Los_Angeles').format('YYYY-MM-DD HH:mm:ss'), id];
+    const params = [status, moment(Date.now()).utc().format('YYYY-MM-DD HH:mm:ss'), id];
     const result = await poolConnection.query(query, params); 
     return result;
   }
