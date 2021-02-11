@@ -13,9 +13,9 @@ const config = require('../../../config');
 
 /**
  * @param {string} url 
- * @returns {Promise<FacebookPage>}
+ * @returns {Promise<FacebookPost>}
  */
-const crawlPage = (url) => {
+const crawlPost = (url) => {
   return new Promise(async (resolve, reject) => {
     try {
       const page0 = await Browser.instance.newPage();
@@ -462,4 +462,4 @@ const crawlPage = (url) => {
   });
 }
 
-module.exports = crawlPage;
+module.exports = crawlPost;

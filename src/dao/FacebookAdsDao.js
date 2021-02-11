@@ -169,6 +169,17 @@ class FacebookAdsDao {
     return result;
   }
 
+  /**
+   * @param {number} fetchSize
+   */
+  static async listTrackedPost(fetchSize) {
+    const query = "SELECT * "
+      + " FROM tb_user_post "
+      + " WHERE s_type = 'tracked'";
+    const result = await poolConnection.query(query, [id]);
+    return result;
+  }
+
 }
 
 module.exports = FacebookAdsDao;

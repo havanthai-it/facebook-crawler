@@ -31,6 +31,9 @@ const config = {
     },
     seedingKeywordQueue: {
       concurrency: 1
+    },
+    postQueue: {
+      concurrency: 1
     }
   },
   space: {
