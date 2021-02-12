@@ -115,6 +115,20 @@ class FacebookPageDao {
   }
 
   /**
+   * @param {FacebookPage} facebookPage 
+   * @returns {boolean}
+   */
+  static async updateHasAds(username, hasAds) {
+    const query = "UPDATE tb_facebook_page SET "
+      + " n_has_ads = ? "
+      + " WHERE s_username = ? ";
+    const params = [hasAds, username];
+    logger.info("[FACEBOOK PAGE DAO] Update n_has_ads params=" + params.toString());
+    const result = await poolConnection.query(query, params);
+    return result;
+  }
+
+  /**
    * @param {string} id 
    * @param {string} status 
    */

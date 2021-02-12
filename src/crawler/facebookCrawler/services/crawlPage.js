@@ -40,6 +40,8 @@ const crawlPage = (url) => {
         logger.info(`[CRAWL PAGE] Load successfully ${url}`);
       } catch (e) {
         logger.error(`[CRAWL PAGE] Can not get response ${url}`);
+        const username = url.split('?')[0].split('/')[3];
+        await FacebookPageDao.updateHasAds(username, 0);
         if (page0) await page0.close();
         return reject(e);
       }
@@ -234,40 +236,40 @@ const crawlPage = (url) => {
           let datetime = '';
           let tempDatetime = '';
           if (rawDatetime.indexOf('second') > -1 || rawDatetime.indexOf('min') > -1 || rawDatetime.indexOf('hour') > -1 || rawDatetime.indexOf('hr') > -1) {
-            datetime = now.getUTCFullYear() + '-' + ('00' + (now.getUTCMonth() + 1)).substr(-2) + '-' + ('00' + now.getUTCDate()).substr(-2);
+            datetime = now.getFullYear() + '-' + ('00' + (now.getMonth() + 1)).substr(-2) + '-' + ('00' + now.getDate()).substr(-2);
 
             if (rawDatetime.indexOf('second') > -1) {
               let ss = rawDatetime.split(' ')[0].replace( /\D+/g, '');
               if (now.getHours() === 0 && now.getMinutes() === 0 && (now.getSeconds() - ss) < 0) {
                 now.setMinutes(now.getMinutes() - 1);
-                datetime = now.getUTCFullYear() + '-' + ('00' + (now.getUTCMonth() + 1)).substr(-2) + '-' + ('00' + now.getUTCDate()).substr(-2);
-                datetime = datetime + ' ' + now.getUTCHours() + ':' + now.getUTCMinutes + ':00';
+                datetime = now.getFullYear() + '-' + ('00' + (now.getMonth() + 1)).substr(-2) + '-' + ('00' + now.getDate()).substr(-2);
+                datetime = datetime + ' ' + now.getHours() + ':' + now.getMinutes + ':00';
               } else {
-                datetime = datetime + ' ' + now.getUTCHours() + ':' + now.getUTCMinutes + ':00';
+                datetime = datetime + ' ' + now.getHours() + ':' + now.getMinutes + ':00';
               }
             } else if (rawDatetime.indexOf('min') > -1) {
               let mm = rawDatetime.split(' ')[0].replace( /\D+/g, '');
               if (now.getHours() === 0 && (now.getMinutes() - mm) < 0) {
                 now.setMinutes(now.getMinutes() - mm);
-                datetime = now.getUTCFullYear() + '-' + ('00' + (now.getUTCMonth() + 1)).substr(-2) + '-' + ('00' + now.getUTCDate()).substr(-2);
-                datetime = datetime + ' ' + now.getUTCHours() + ':00:00';
+                datetime = now.getFullYear() + '-' + ('00' + (now.getMonth() + 1)).substr(-2) + '-' + ('00' + now.getDate()).substr(-2);
+                datetime = datetime + ' ' + now.getHours() + ':00:00';
               } else {
-                datetime = datetime + ' ' + now.getUTCHours() + ':00:00';
+                datetime = datetime + ' ' + now.getHours() + ':00:00';
               }
             } else if (rawDatetime.indexOf('hour') > -1 || rawDatetime.indexOf('hr') > -1) {
               let hh = rawDatetime.split(' ')[0].replace( /\D+/g, '');
               if (now.getHours() - hh < 0) {
                 now.setHours(now.getHours() - hh);
-                datetime = datetime + ' ' + now.getUTCHours() + ':00:00';
+                datetime = datetime + ' ' + now.getHours() + ':00:00';
               } else {
-                datetime = datetime + ' ' + now.getUTCHours() + ':00:00';
+                datetime = datetime + ' ' + now.getHours() + ':00:00';
               }
             } else {
               datetime = datetime + ' ' + '00:00:00';
             }
           } else {
-            let todayDateStr = ('00' + (now.getUTCMonth() + 1)).substr(-2) + ' ' + ('00' + now.getUTCDate()).substr(-2);
-            let yesterdayDateStr = ('00' + (yesterday.getUTCMonth() + 1)).substr(-2) + ' ' + ('00' + yesterday.getUTCDate()).substr(-2);
+            let todayDateStr = ('00' + (now.getMonth() + 1)).substr(-2) + ' ' + ('00' + now.getDate()).substr(-2);
+            let yesterdayDateStr = ('00' + (yesterday.getMonth() + 1)).substr(-2) + ' ' + ('00' + yesterday.getDate()).substr(-2);
             rawDatetime = rawDatetime.replace('Today', todayDateStr); // Today at 6:30 PM
             rawDatetime = rawDatetime.replace('Yesterday', yesterdayDateStr); // Yesterday at 6:30 PM
             
@@ -275,18 +277,18 @@ const crawlPage = (url) => {
             if (rawDatetime.indexOf('at') > -1 && rawDatetime.indexOf(',') > -1) { // June 11, 2020 at 6:30 PM
               tempDatetime = rawDatetime.replace('at', '').replace(',', '').replace(/\s\s+/g, ' ').replace(/\s/g, ' ');
             } else if (rawDatetime.indexOf('at') > -1 && rawDatetime.indexOf(',') === -1) { // June 11 at 6:30 PM
-              tempDatetime = rawDatetime.replace('at', now.getUTCFullYear()).replace(/\s/g, ' ');
+              tempDatetime = rawDatetime.replace('at', now.getFullYear()).replace(/\s/g, ' ');
             } else if (rawDatetime.indexOf('at') === -1 && rawDatetime.indexOf(',') > -1) { // June 11, 2020 
               tempDatetime = rawDatetime.replace(',', '').replace(/\s/g, ' ');
               hasTime = false;
             } else if (rawDatetime.indexOf('at') === -1 && rawDatetime.indexOf(',') === -1) { // June 11
-              tempDatetime = (rawDatetime + ' ' + now.getUTCFullYear()).replace(/\s/g, ' ');
+              tempDatetime = (rawDatetime + ' ' + now.getFullYear()).replace(/\s/g, ' ');
               hasTime = false;
             }
             let datetimeObj = new Date(tempDatetime);
-            datetime = datetimeObj.getUTCFullYear() + '-' + ('00' + (datetimeObj.getUTCMonth() + 1)).substr(-2) + '-' + ('00' + datetimeObj.getUTCDate()).substr(-2);
+            datetime = datetimeObj.getFullYear() + '-' + ('00' + (datetimeObj.getMonth() + 1)).substr(-2) + '-' + ('00' + datetimeObj.getDate()).substr(-2);
             if (hasTime) {
-              datetime = datetime + ' ' + ('00' + datetimeObj.getUTCHours()).substr(-2) + ':' + ('00' + datetimeObj.getUTCMinutes()).substr(-2) + ':00';
+              datetime = datetime + ' ' + ('00' + datetimeObj.getHours()).substr(-2) + ':' + ('00' + datetimeObj.getMinutes()).substr(-2) + ':00';
             } else {
               datetime = datetime + ' ' + '00:00:00';
             }
