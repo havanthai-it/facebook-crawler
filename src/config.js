@@ -27,7 +27,7 @@ const config = {
       concurrency:1
     },
     urlPageQueue: {
-      concurrency: 3
+      concurrency: 2
     },
     seedingKeywordQueue: {
       concurrency: 1

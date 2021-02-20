@@ -51,7 +51,7 @@ const crawlPage = (url) => {
       let nScrolls = 5;
       for (let i = 0; i < nScrolls; i++) {
         logger.info(`[CRAWL PAGE] Scroll to bottom ${url}`);
-        await sleep(5000 + 5000 * Math.random());
+        await sleep(3000 + 3000 * Math.random());
         await page0.evaluate(() => {
           window.scrollTo(0, document.body.scrollHeight);
         });
@@ -241,31 +241,19 @@ const crawlPage = (url) => {
 
             if (rawDatetime.indexOf('second') > -1 || rawDatetime.match(/[0-9]s/g)) {
               let ss = rawDatetime.split(' ')[0].replace( /\D+/g, '');
-              if (now.getHours() === 0 && now.getMinutes() === 0 && (now.getSeconds() - ss) < 0) {
-                now.setMinutes(now.getMinutes() - 1);
-                datetime = now.getFullYear() + '-' + ('00' + (now.getMonth() + 1)).substr(-2) + '-' + ('00' + now.getDate()).substr(-2);
-                datetime = datetime + ' ' + now.getHours() + ':' + now.getMinutes + ':00';
-              } else {
-                datetime = datetime + ' ' + now.getHours() + ':' + now.getMinutes + ':00';
-              }
+              now.setSeconds(now.getSeconds() - ss);
+              datetime = now.getFullYear() + '-' + ('00' + (now.getMonth() + 1)).substr(-2) + '-' + ('00' + now.getDate()).substr(-2);
+              datetime = datetime + ' ' + now.getHours() + ':' + now.getMinutes() + ':00';
             } else if (rawDatetime.indexOf('min') > -1 || rawDatetime.match(/[0-9]m/g)) {
               let mm = rawDatetime.split(' ')[0].replace( /\D+/g, '');
-              if (now.getHours() === 0 && (now.getMinutes() - mm) < 0) {
-                now.setMinutes(now.getMinutes() - mm);
-                datetime = now.getFullYear() + '-' + ('00' + (now.getMonth() + 1)).substr(-2) + '-' + ('00' + now.getDate()).substr(-2);
-                datetime = datetime + ' ' + now.getHours() + ':00:00';
-              } else {
-                datetime = datetime + ' ' + now.getHours() + ':00:00';
-              }
+              now.setMinutes(now.getMinutes() - mm);
+              datetime = now.getFullYear() + '-' + ('00' + (now.getMonth() + 1)).substr(-2) + '-' + ('00' + now.getDate()).substr(-2);
+              datetime = datetime + ' ' + now.getHours() + ':' + now.getMinutes() + ':00';
             } else if (rawDatetime.indexOf('hour') > -1 || rawDatetime.indexOf('hr') > -1 || rawDatetime.match(/[0-9]h/g)) {
               let hh = rawDatetime.split(' ')[0].replace( /\D+/g, '');
-              if (now.getHours() - hh < 0) {
-                now.setHours(now.getHours() - hh);
-                datetime = now.getFullYear() + '-' + ('00' + (now.getMonth() + 1)).substr(-2) + '-' + ('00' + now.getDate()).substr(-2);
-                datetime = datetime + ' ' + now.getHours() + ':00:00';
-              } else {
-                datetime = datetime + ' ' + now.getHours() + ':00:00';
-              }
+              now.setHours(now.getHours() - hh);
+              datetime = now.getFullYear() + '-' + ('00' + (now.getMonth() + 1)).substr(-2) + '-' + ('00' + now.getDate()).substr(-2);
+              datetime = datetime + ' ' + now.getHours() + ':00:00';
             } else {
               datetime = datetime + ' ' + '00:00:00';
             }
@@ -344,7 +332,7 @@ const crawlPage = (url) => {
             await page1.setViewport({ width: 1920, height: 1080 });
             await page1.goto(url1, { waitUntil: 'networkidle0' });
             await page1.waitForSelector('body');
-            await sleep(5000);
+            await sleep(3000);
 
             // GET WEBSITE
             let websiteUrl = page1.url();
