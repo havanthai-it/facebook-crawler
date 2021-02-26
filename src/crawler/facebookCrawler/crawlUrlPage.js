@@ -29,7 +29,7 @@ const crawlUrlPage = async () => {
         logger.info(`[CRAWL URL PAGE] Login successfully`);
 
         urlPageQueue.empty().then(async () => {
-          let listPageUrl = await FacebookPageDao.listPageUrl(2000);
+          let listPageUrl = await FacebookPageDao.listPageUrl(1000, 2000);
           if (listPageUrl && Array.isArray(listPageUrl)) {
             listPageUrl.forEach(url => {
               urlPageQueue.add({

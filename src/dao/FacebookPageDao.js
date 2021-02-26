@@ -144,11 +144,12 @@ class FacebookPageDao {
 
   /**
    * 
-   * @param {number} fetchSize 
+   * @param {number} limit 
+   * @param {number} offset 
    */
-  static async listPageUrl(fetchSize) {
-    const query = "SELECT * FROM tb_url LIMIT ?";
-    const result = await poolConnection.query(query, [fetchSize]);
+  static async listPageUrl(limit, offset) {
+    const query = "SELECT * FROM tb_url LIMIT ? OFFSET ? "; 
+    const result = await poolConnection.query(query, [limit, offset]);
     return result;
   }
 
