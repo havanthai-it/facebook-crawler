@@ -47,17 +47,17 @@ urlPageQueue.process(config.queue.urlPageQueue.concurrency, async (job) => {
     });
 
     // Save similar pages
-    // facebookPage.lstSimilarPages.forEach(async (url) => {
-    //   const username = url.split('?')[0].split('/')[3];
-    //   const page = await FacebookPageDao.getByUsername(username);
+    facebookPage.lstSimilarPages.forEach(async (url) => {
+      const username = url.split('?')[0].split('/')[3];
+      const page = await FacebookPageDao.getByUsername(username);
 
-    //   // Add page url to queue if page is not crawled yet
-    //   if (!page || page.length === 0) {
-    //     url = url.split('?')[0];
-    //     logger.info(`[URL PAGE QUEUE] SAVED ${url}`);
-    //     await FacebookPageDao.insertPageUrl(url);
-    //   }
-    // });
+      // Add page url to queue if page is not crawled yet
+      if (!page || page.length === 0) {
+        url = url.split('?')[0];
+        logger.info(`[URL PAGE QUEUE] SAVED ${url}`);
+        await FacebookPageDao.insertPageUrl(url);
+      }
+    });
 
     await FacebookPageDao.deletePageUrl(job.data.url);
     
