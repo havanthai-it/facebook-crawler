@@ -1,11 +1,11 @@
 const puppeteer = require('puppeteer');
 const logger = require('../../utils/logger');
 const Browser = require('../../utils/Browser');
-const urlPageQueue = require('./queues/urlPageQueue');
+const similarPageQueue = require('./queues/similarPageQueue');
 const FacebookPageDao = require('../../dao/FacebookPageDao');
 const sleep = require('../../utils/funcs/sleep');
 
-const crawlUrlPage = async () => {
+const crawlSimilarPage = async () => {
 
   try {
     
@@ -17,7 +17,7 @@ const crawlUrlPage = async () => {
       try {
         // await login form
         await page.waitForSelector('#login_form');
-        logger.info(`[CRAWL URL PAGE] Loaded login page successfully`);
+        logger.info(`[CRAWL SIMILAR PAGE] Loaded login page successfully`);
 
         await sleep(5000);
 
@@ -26,30 +26,30 @@ const crawlUrlPage = async () => {
         await page.click('button[name="login"]');
         await sleep(5000);
         await page.waitForSelector('div[role="main"]');
-        logger.info(`[CRAWL URL PAGE] Login successfully`);
+        logger.info(`[CRAWL SIMILAR PAGE] Login successfully`);
 
-        urlPageQueue.empty().then(async () => {
-          let listPageUrl = await FacebookPageDao.listPageUrl(3000, 0);
+        similarPageQueue.empty().then(async () => {
+          let listPageUrl = await FacebookPageDao.listPageUrl(1000, 0);
           if (listPageUrl && Array.isArray(listPageUrl)) {
             listPageUrl.forEach(url => {
-              urlPageQueue.add({
+              similarPageQueue.add({
                 url: url.s_url
               });
             });
           }
         }).catch(e => {
-          logger.error(`[CRAWL URL PAGE] Error while add page url to urlPageQueue: ${e}`);
+          logger.error(`[CRAWL SIMILAR PAGE] Error while add page url to similarPageQueue: ${e}`);
         });
       } catch (e) {
-        logger.error(`[CRAWL URL PAGE] Already login or there are some errors occured: ${e}`);
+        logger.error(`[CRAWL SIMILAR PAGE] Already login or there are some errors occured: ${e}`);
       }
     });
 
   } catch (e) {
-    logger.error(`[CRAWL URL PAGE] ${e}`);
+    logger.error(`[CRAWL SIMILAR PAGE] ${e}`);
     return;
   }
   
 }
 
-crawlUrlPage();
+crawlSimilarPage();
