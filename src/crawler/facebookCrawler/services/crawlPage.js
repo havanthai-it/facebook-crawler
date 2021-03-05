@@ -330,7 +330,8 @@ const crawlPage = (url) => {
           try {
             page1 = await Browser.instance.newPage();
             await page1.setViewport({ width: 1920, height: 1080 });
-            await page1.goto(url1, { waitUntil: 'networkidle0' });
+            // await page1.goto(url1, { waitUntil: 'networkidle0' });
+            await page1.goto(url1, { waitUntil: 'load' });
             await page1.waitForSelector('body');
             await sleep(3000);
 

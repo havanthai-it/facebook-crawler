@@ -11,7 +11,7 @@ class Browser {
       args: [
         '--disable-gpu',
         '--no-sandbox',
-        '--single-process', 
+        // '--single-process', 
         '--disable-web-security',
         '--disable-dev-profile',
         '--disable-notifications'
