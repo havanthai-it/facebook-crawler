@@ -133,7 +133,7 @@ const crawlPage = (url) => {
         let result = [];
         let lstPostEle = document.querySelectorAll('.k4urcfbm .du4w35lb.k4urcfbm.l9j0dhe7.sjgh65i0');
 
-        lstPostEle.forEach(item => {
+        lstPostEle.forEach(async item => {
           // TYPE
           let type = '';
 
@@ -168,7 +168,7 @@ const crawlPage = (url) => {
 
           // CLICK SEE MORE BUTTON
           let eleSeeMore = item.querySelector('div.oajrlxb2.g5ia77u1.qu0x051f.esr5mh6w.e9989ue4.r7d6kgcz.rq0escxv.nhd2j8a9.nc684nl6.p7hjln8o.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.jb3vyjys.rz4wbd8a.qt6c0cv9.a8nywdso.i1ao9s8h.esuyzwwr.f1sip0of.lzcic4wl.oo9gr5id.gpro0wi8.lrazzd5p');
-          if (eleSeeMore) eleSeeMore.click();
+          if (eleSeeMore) await eleSeeMore.click();
 
           // GET CONTENT
           let ele4 = item.querySelector('span.d2edcug0.hpfvmrgz.qv66sw1b.c1et5uql.rrkovp55.a8c37x1j.keod5gw0.nxhoafnm.aigsh9s9.d3f4x2em.fe6kdd0r.mau55g9w.c8b282yb.iv3no6db.gfeo3gy3.a3bd9o3v.knj5qynh.oo9gr5id.hzawbc8m');
