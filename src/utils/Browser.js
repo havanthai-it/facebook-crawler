@@ -9,7 +9,7 @@ class Browser {
     Browser.instance = await puppeteer.launch({ 
       headless: true,
       args: [
-        '--disable-gpu',
+        // '--disable-gpu',
         '--no-sandbox',
         // '--single-process', 
         '--disable-web-security',

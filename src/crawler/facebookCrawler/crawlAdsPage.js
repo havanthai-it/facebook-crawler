@@ -28,18 +28,11 @@ const crawlAdsPage = async () => {
         await page.waitForSelector('div[role="main"]');
         logger.info(`[CRAWL ADS PAGE] Login successfully`);
 
-        adsPageQueue.empty().then(async () => {
-          let listPage = await FacebookPageDao.list(1, 3, 1000);
-          if (listPage && Array.isArray(listPage)) {
-            listPage.forEach(page => {
-              adsPageQueue.add({
-                url: `https://www.facebook.com/${page.s_username}/`
-              });
-            });
-          }
-        }).catch(e => {
-          logger.error(`[CRAWL ADS PAGE] Error while add page url to adsPageQueue: ${e}`);
-        });
+        await addToQueue(adsPageQueue);
+        setInterval(async () => {
+          await addToQueue(adsPageQueue);
+        }, 1000*60*60*24);
+        
       } catch (e) {
         logger.info(`[CRAWL ADS PAGE] Already login or there are some errors occured: ${e}`);
       }
@@ -50,6 +43,23 @@ const crawlAdsPage = async () => {
     return;
   }
   
+}
+
+const addToQueue = async (queue) => {
+  await queue.empty();
+  await queue.clean(0, 'active');
+  await queue.clean(0, 'completed');
+  await queue.clean(0, 'delayed');
+  await queue.clean(0, 'failed');
+
+  let listPage = await FacebookPageDao.list(1, 7, 1000);
+  if (listPage && Array.isArray(listPage)) {
+    listPage.forEach(page => {
+      queue.add({
+        url: `https://www.facebook.com/${page.s_username}/`
+      });
+    });
+  }
 }
 
 crawlAdsPage();

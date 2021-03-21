@@ -6,6 +6,7 @@ const sleep = require('../../../utils/funcs/sleep');
 const randomString = require('../../../utils/funcs/randomString');
 const FacebookPage = require('../../../models/FacebookPage');
 const FacebookPageDao = require('../../../dao/FacebookPageDao');
+const FacebookAdsDao = require('../../../dao/FacebookAdsDao');
 const DateUtils = require('../../../utils/DateUtils');
 const FileUtils = require('../../../utils/FileUtils');
 const DOSpaceClient = require('../../../ext/DOSpaceClient');
@@ -51,7 +52,7 @@ const crawlPage = (url) => {
       let nScrolls = 5;
       for (let i = 0; i < nScrolls; i++) {
         logger.info(`[CRAWL PAGE] Scroll to bottom ${url}`);
-        await sleep(3000 + 3000 * Math.random());
+        await sleep(1000 + 3000 * Math.random());
         await page0.evaluate(() => {
           window.scrollTo(0, document.body.scrollHeight);
         });
@@ -83,12 +84,12 @@ const crawlPage = (url) => {
 
           // likes
           if (ele.innerText.indexOf('people like this') > -1) {
-            likes = parseInt(ele.innerText.trim().split(' ')[0].replace( /\D+/g, ''));
+            likes = parseInt(ele.innerText.trim().split(' ')[0].replace(/\D+/g, ''));
           }
 
           // follows
           if (ele.innerText.indexOf('people follow this') > -1) {
-            follows = parseInt(ele.innerText.trim().split(' ')[0].replace( /\D+/g, ''));
+            follows = parseInt(ele.innerText.trim().split(' ')[0].replace(/\D+/g, ''));
           }
 
         });
@@ -139,7 +140,7 @@ const crawlPage = (url) => {
 
           // GET POST ID
           let postId = '';
- 
+
           // GET IMAGES
           let ele0 = item.querySelector('a.oajrlxb2.gs1a9yip.g5ia77u1.mtkw9kbi.tlpljxtp.qensuy8j.ppp5ayq2.goun2846.ccm00jje.s44p3ltw.mk2mc5f4.rt8b4zig.n8ej3o3l.agehan2d.sk4xxmp2.rq0escxv.nhd2j8a9.a8c37x1j.mg4g778l.btwxx1t3.pfnyh3mw.p7hjln8o.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.tgvbjcpo.hpfvmrgz.jb3vyjys.rz4wbd8a.qt6c0cv9.a8nywdso.l9j0dhe7.i1ao9s8h.esuyzwwr.f1sip0of.du4w35lb.lzcic4wl.abiwlrkh.p8dawk7l.tm8avpzi');
           let ele1 = item.querySelectorAll('img.i09qtzwb.n7fi1qx3.datstx6m.pmk7jnqg.j9ispegn.kr520xx4.k4urcfbm');
@@ -184,15 +185,15 @@ const crawlPage = (url) => {
             // GET LIKES
             let ele5 = eleBottomRow.querySelector('.bp9cbjyn.j83agx80.buofh1pr.ni8dbmo4.stjgntxs .bzsjyuwj.ni8dbmo4.stjgntxs.ltmttdrg.gjzvkazv');
             let likeStr = ele5 ? ele5.innerText : '';
-            likes = likeStr ? parseInt(likeStr.replace( /\D+/g, '')) : 0;
+            likes = likeStr ? parseInt(likeStr.replace(/\D+/g, '')) : 0;
 
             // GET COMMENTS
             let ele6 = eleBottomRow.querySelectorAll('.bp9cbjyn.j83agx80.pfnyh3mw.p1ueia1e span.d2edcug0.hpfvmrgz.qv66sw1b.c1et5uql.rrkovp55.a8c37x1j.keod5gw0.nxhoafnm.aigsh9s9.d3f4x2em.fe6kdd0r.mau55g9w.c8b282yb.iv3no6db.gfeo3gy3.a3bd9o3v.knj5qynh.m9osqain');
-            if (ele6) ele6.forEach (i => {
+            if (ele6) ele6.forEach(i => {
               if (i.innerText.toLowerCase().indexOf('comment') > -1) {
-                comments = i.innerText.replace( /\D+/g, '');
+                comments = i.innerText.replace(/\D+/g, '');
               } else if (i.innerText.toLowerCase().indexOf('share') > -1) {
-                shares = i.innerText.replace( /\D+/g, '');
+                shares = i.innerText.replace(/\D+/g, '');
               }
             });
           }
@@ -218,7 +219,7 @@ const crawlPage = (url) => {
               if (link && links.length === 0) links.push(link);
             });
           }
-          
+
           // GET PUBLISHED DATE
           let ele9 = item.querySelector('.j1lvzwm4.stjgntxs.ni8dbmo4.q9uorilb.gpro0wi8');
           if (!ele9) return;
@@ -228,7 +229,7 @@ const crawlPage = (url) => {
               i.parentNode.removeChild(i);
             }
           });
-          
+
           const now = new Date();
           const yesterday = new Date();
           yesterday.setDate(now.getDate() - 1);
@@ -240,17 +241,17 @@ const crawlPage = (url) => {
             datetime = now.getFullYear() + '-' + ('00' + (now.getMonth() + 1)).substr(-2) + '-' + ('00' + now.getDate()).substr(-2);
 
             if (rawDatetime.indexOf('second') > -1 || rawDatetime.match(/[0-9]s/g)) {
-              let ss = rawDatetime.split(' ')[0].replace( /\D+/g, '');
+              let ss = rawDatetime.split(' ')[0].replace(/\D+/g, '');
               now.setSeconds(now.getSeconds() - ss);
               datetime = now.getFullYear() + '-' + ('00' + (now.getMonth() + 1)).substr(-2) + '-' + ('00' + now.getDate()).substr(-2);
               datetime = datetime + ' ' + now.getHours() + ':' + now.getMinutes() + ':00';
             } else if (rawDatetime.indexOf('min') > -1 || rawDatetime.match(/[0-9]m/g)) {
-              let mm = rawDatetime.split(' ')[0].replace( /\D+/g, '');
+              let mm = rawDatetime.split(' ')[0].replace(/\D+/g, '');
               now.setMinutes(now.getMinutes() - mm);
               datetime = now.getFullYear() + '-' + ('00' + (now.getMonth() + 1)).substr(-2) + '-' + ('00' + now.getDate()).substr(-2);
               datetime = datetime + ' ' + now.getHours() + ':' + now.getMinutes() + ':00';
             } else if (rawDatetime.indexOf('hour') > -1 || rawDatetime.indexOf('hr') > -1 || rawDatetime.match(/[0-9]h/g)) {
-              let hh = rawDatetime.split(' ')[0].replace( /\D+/g, '');
+              let hh = rawDatetime.split(' ')[0].replace(/\D+/g, '');
               now.setHours(now.getHours() - hh);
               datetime = now.getFullYear() + '-' + ('00' + (now.getMonth() + 1)).substr(-2) + '-' + ('00' + now.getDate()).substr(-2);
               datetime = datetime + ' ' + now.getHours() + ':00:00';
@@ -262,7 +263,7 @@ const crawlPage = (url) => {
             let yesterdayDateStr = ('00' + (yesterday.getMonth() + 1)).substr(-2) + ' ' + ('00' + yesterday.getDate()).substr(-2);
             rawDatetime = rawDatetime.replace('Today', todayDateStr); // Today at 6:30 PM
             rawDatetime = rawDatetime.replace('Yesterday', yesterdayDateStr); // Yesterday at 6:30 PM
-            
+
             let hasTime = true;
             if (rawDatetime.indexOf('at') > -1 && rawDatetime.indexOf(',') > -1) { // June 11, 2020 at 6:30 PM
               tempDatetime = rawDatetime.replace('at', '').replace(',', '').replace(/\s\s+/g, ' ').replace(/\s/g, ' ');
@@ -283,7 +284,7 @@ const crawlPage = (url) => {
               datetime = datetime + ' ' + '00:00:00';
             }
           }
-          
+
           if (postId && links.length > 0 && images.length > 0 && facebookPage.sUsername && links.length > 0) {
             result.push({
               sPostId: postId,
@@ -320,129 +321,133 @@ const crawlPage = (url) => {
       if (lstAds.length > 0) {
 
         // For each ads post, go to link in ads content to get platform, pixel id, website domain
-        for (const post of lstAds) {
+        for (let post of lstAds) {
 
-          /* START GO TO WEBSITE */
-          let url1 = post.sLinks.split(',')[0];
-          
-          let page1 = null;
+          const foundPost = await FacebookAdsDao.getByPostId(post.sPostId);
+          if (!foundPost || foundPost.length === 0) {
+            /* START GO TO WEBSITE */
+            let url1 = post.sLinks.split(',')[0];
 
-          try {
-            page1 = await Browser.instance.newPage();
-            await page1.setViewport({ width: 1920, height: 1080 });
-            // await page1.goto(url1, { waitUntil: 'networkidle0' });
-            await page1.goto(url1, { waitUntil: 'load' });
-            await page1.waitForSelector('body');
-            await sleep(3000);
+            let page1 = null;
 
-            // GET WEBSITE
-            let websiteUrl = page1.url();
-            post.sWebsite = websiteUrl.split('/')[0] + '//' + websiteUrl.split('/')[2];
-            post.sWebsite = post.sWebsite.toLowerCase();
+            try {
+              page1 = await Browser.instance.newPage();
+              await page1.setViewport({ width: 1920, height: 1080 });
+              // await page1.goto(url1, { waitUntil: 'networkidle0' });
+              await page1.goto(url1, { waitUntil: 'load' });
+              await page1.waitForSelector('body');
+              await sleep(1000);
 
-            let newPost = await page1.evaluate((post) => {
-              // GET PIXEL ID
-              let scriptTag = document.querySelector('head script[src^="https://connect.facebook.net/signals/config"]');
+              // GET WEBSITE
+              let websiteUrl = page1.url();
+              post.sWebsite = websiteUrl.split('/')[0] + '//' + websiteUrl.split('/')[2];
+              post.sWebsite = post.sWebsite.toLowerCase();
 
-              if (scriptTag) {
-                let scriptLink = scriptTag.getAttribute('src').split('?')[0];
-                post.sPixelId = scriptLink.split('/')[scriptLink.split('/').length - 1]
-              } else {
-                // No pixel id found => should not crawl this page
-                return post;
-              }
+              let newPost = await page1.evaluate((post) => {
+                // GET PIXEL ID
+                let scriptTag = document.querySelector('head script[src^="https://connect.facebook.net/signals/config"]');
 
-              // GET PLATFORM
-              if (post.sWebsite.indexOf('amazon.com') > -1) {
-                post.sPlatform = 'amazon';
-              } else if (post.sWebsite.indexOf('ebay.com') > -1) {
-                post.sPlatform = 'ebay';
-              } else if (post.sWebsite.indexOf('etsy.com') > -1) {
-                post.sPlatform = 'etsy';
-              } else if (post.sWebsite.indexOf('gearbubble.com') > -1) {
-                post.sPlatform = 'gearbubble';
-              } else if (post.sWebsite.indexOf('redbubble.com') > -1) {
-                post.sPlatform = 'redbubble';
-              } else if (post.sWebsite.indexOf('spreadshirt.com') > -1) {
-                post.sPlatform = 'spreadshirt';
-              } else if (post.sWebsite.indexOf('sunfrog.com') > -1) {
-                post.sPlatform = 'sunfrog';
-              } else if (post.sWebsite.indexOf('teehag.com') > -1) {
-                post.sPlatform = 'teehag';
-              } else if (post.sWebsite.indexOf('teespring.com') > -1) {
-                post.sPlatform = 'teespring';
-              } else if (post.sWebsite.indexOf('teepublic.com') > -1) {
-                post.sPlatform = 'teepublic';
-              } else if (post.sWebsite.indexOf('teechip.com') > -1 || document.getElementsByTagName('html')[0].innerHTML.search(/teechip/i) > -1) {
-                post.sPlatform = 'teechip';
-              } else if (post.sWebsite.indexOf('teezily.com') > -1 || document.getElementsByTagName('html')[0].innerHTML.search(/teezily/i) > -1) {
-                post.sPlatform = 'teezily';
-              } else {
-                if (document.querySelector('script[src*="shopify"]')) {
-                  post.sPlatform = 'shopify';
-                } else if (document.querySelector('div[class*="woocommerce"]')) {
-                  post.sPlatform = 'woocommerce';
-                } else if (document.querySelector('a[src*="bigcommerce"]')) {
-                  post.sPlatform = 'bigcommerce';
-                } else if (document.querySelector('script[data-requiremodule*="Magento_PageBuilder"]')) {
-                  post.sPlatform = 'magento';
-                } else if (document.querySelector('link[href*="https://cdn.btdmp.com/"]')) {
-                  post.sPlatform = 'shopbase';
-                } else if (document.getElementsByTagName('html')[0].innerHTML.search(/teemill/i) > -1) {
-                  post.sPlatform = 'teemill';
-                } else if (document.getElementsByTagName('html')[0].innerHTML.search(/gearlaunch/i) > -1) {
-                  post.sPlatform = 'gearlaunch';
-                } else if (document.getElementsByTagName('html')[0].innerHTML.search(/merchize/i) > -1) {
-                  post.sPlatform = 'merchize';
-                } else if (document.getElementsByTagName('html')[0].innerHTML.search(/hostingrocket/i) > -1) {
-                  post.sPlatform = 'hostingrocket';
-                } else if (document.querySelector('link[href*="proui/"]') && document.querySelector('script[src*="proui/"]')) {
-                  post.sPlatform = 'merchking';
+                if (scriptTag) {
+                  let scriptLink = scriptTag.getAttribute('src').split('?')[0];
+                  post.sPixelId = scriptLink.split('/')[scriptLink.split('/').length - 1]
+                } else {
+                  // No pixel id found => should not crawl this page
+                  return post;
                 }
+
+                // GET PLATFORM
+                if (post.sWebsite.indexOf('amazon.com') > -1) {
+                  post.sPlatform = 'amazon';
+                } else if (post.sWebsite.indexOf('ebay.com') > -1) {
+                  post.sPlatform = 'ebay';
+                } else if (post.sWebsite.indexOf('etsy.com') > -1) {
+                  post.sPlatform = 'etsy';
+                } else if (post.sWebsite.indexOf('gearbubble.com') > -1) {
+                  post.sPlatform = 'gearbubble';
+                } else if (post.sWebsite.indexOf('redbubble.com') > -1) {
+                  post.sPlatform = 'redbubble';
+                } else if (post.sWebsite.indexOf('spreadshirt.com') > -1) {
+                  post.sPlatform = 'spreadshirt';
+                } else if (post.sWebsite.indexOf('sunfrog.com') > -1) {
+                  post.sPlatform = 'sunfrog';
+                } else if (post.sWebsite.indexOf('teehag.com') > -1) {
+                  post.sPlatform = 'teehag';
+                } else if (post.sWebsite.indexOf('teespring.com') > -1) {
+                  post.sPlatform = 'teespring';
+                } else if (post.sWebsite.indexOf('teepublic.com') > -1) {
+                  post.sPlatform = 'teepublic';
+                } else if (post.sWebsite.indexOf('teechip.com') > -1 || document.getElementsByTagName('html')[0].innerHTML.search(/teechip/i) > -1) {
+                  post.sPlatform = 'teechip';
+                } else if (post.sWebsite.indexOf('teezily.com') > -1 || document.getElementsByTagName('html')[0].innerHTML.search(/teezily/i) > -1) {
+                  post.sPlatform = 'teezily';
+                } else {
+                  if (document.querySelector('script[src*="shopify"]')) {
+                    post.sPlatform = 'shopify';
+                  } else if (document.querySelector('div[class*="woocommerce"]')) {
+                    post.sPlatform = 'woocommerce';
+                  } else if (document.querySelector('a[src*="bigcommerce"]')) {
+                    post.sPlatform = 'bigcommerce';
+                  } else if (document.querySelector('script[data-requiremodule*="Magento_PageBuilder"]')) {
+                    post.sPlatform = 'magento';
+                  } else if (document.querySelector('link[href*="https://cdn.btdmp.com/"]')) {
+                    post.sPlatform = 'shopbase';
+                  } else if (document.getElementsByTagName('html')[0].innerHTML.search(/teemill/i) > -1) {
+                    post.sPlatform = 'teemill';
+                  } else if (document.getElementsByTagName('html')[0].innerHTML.search(/gearlaunch/i) > -1) {
+                    post.sPlatform = 'gearlaunch';
+                  } else if (document.getElementsByTagName('html')[0].innerHTML.search(/merchize/i) > -1) {
+                    post.sPlatform = 'merchize';
+                  } else if (document.getElementsByTagName('html')[0].innerHTML.search(/hostingrocket/i) > -1) {
+                    post.sPlatform = 'hostingrocket';
+                  } else if (document.querySelector('link[href*="proui/"]') && document.querySelector('script[src*="proui/"]')) {
+                    post.sPlatform = 'merchking';
+                  }
+                }
+
+                return post;
+              }, post);
+              /* END GO TO WEBSITE */
+
+              if (newPost.sPixelId && newPost.sPlatform) {
+                // upload post image to digital ocean space
+                let newImages = [];
+                let arr = newPost.sImages.split(',');
+                for (let postImage of arr) {
+                  const newPostImage = await FileUtils.download(postImage, config.file.downloadPath + 'post_' + randomString(8) + FileUtils.getImageExtension(postImage));
+                  newImages.push(await DOSpaceClient.uploadImage(newPostImage));
+                  await FileUtils.delete(newPostImage);
+                };
+                newPost.sImages = newImages.join();
+
+                facebookPage.lstAds.push(newPost);
               }
-
-              return post;
-            }, post);
-            /* END GO TO WEBSITE */
-
-            if (newPost.sPixelId && newPost.sPlatform) {
-              // upload post image to digital ocean space
-              let newImages = [];
-              let arr = newPost.sImages.split(',');
-              for (let postImage of arr) {
-                const newPostImage = await FileUtils.download(postImage, config.file.downloadPath + 'post_' + randomString(8) + FileUtils.getImageExtension(postImage));
-                newImages.push(await DOSpaceClient.uploadImage(newPostImage));
-                await FileUtils.delete(newPostImage);
-              };
-              newPost.sImages = newImages.join();
-
-              facebookPage.lstAds.push(newPost);
+            } catch (e) {
+              logger.error(`[CRAWL ADS] Can not get response ${url1} ${e}`);
+              logger.error(e.stack);
             }
-          } catch (e) {
-            logger.error(`[CRAWL ADS] Can not get response ${url1} ${e}`);
-            logger.error(e.stack);
+
+            // Close page
+            if (page1) {
+              // logger.info(`[CRAWL ADS] Closing page...`);
+              await page1.close({ runBeforeUnload: true });
+              // logger.info(`[CRAWL ADS] Page closed.`);
+            }
+          } else {
+            facebookPage.nHasAds = 1;
           }
 
-          // Close page
-          if (page1) {
-            // logger.info(`[CRAWL ADS] Closing page...`);
-            await page1.close({ runBeforeUnload: true });
-            // logger.info(`[CRAWL ADS] Page closed.`);
-          }
         }
-        
+
       }
 
       // SET HASADS
       if (facebookPage.lstAds.length > 0) {
         facebookPage.nHasAds = 1;
-        
+
         // upload image to digital ocean space
         const newPageImage = await FileUtils.download(facebookPage.sThumbnail, config.file.downloadPath + 'page_' + randomString(8) + FileUtils.getImageExtension(facebookPage.sThumbnail));
         facebookPage.sThumbnail = await DOSpaceClient.uploadImage(newPageImage);
         await FileUtils.delete(newPageImage);
-      } else {
-        facebookPage.nHasAds = 0;
       }
 
       // Close page

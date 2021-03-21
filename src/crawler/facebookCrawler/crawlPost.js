@@ -28,20 +28,11 @@ const crawlPost = async () => {
         await page.waitForSelector('div[role="main"]');
         logger.info(`[CRAWL POST] Login successfully`);
 
-        postQueue.empty().then(async () => {
-          let listPost = await FacebookAdsDao.listTrackedPost(1000);
-          if (listPost && Array.isArray(listPost)) {
-            listPost.forEach(p => {
-              postQueue.add({
-                postId: p.s_post_id,
-                facebookPageUsername: p.s_facebook_page_username,
-                url:`https://facebook.com/${p.s_facebook_page_username}/posts/${p.s_post_id}`
-              });
-            });
-          }
-        }).catch(e => {
-          logger.error(`[CRAWL POST] Error while add page url to postQueue: ${e}`);
-        });
+        await addToQueue(postQueue);
+        setInterval(async () => {
+          await addToQueue(postQueue);
+        }, 1000*60*60*24);
+        
       } catch (e) {
         logger.error(`[CRAWL POST] Already login or there are some errors occured: ${e}`);
       }
@@ -52,6 +43,25 @@ const crawlPost = async () => {
     return;
   }
   
+}
+
+const addToQueue = async (queue) => {
+  await queue.empty();
+  await queue.clean(0, 'active');
+  await queue.clean(0, 'completed');
+  await queue.clean(0, 'delayed');
+  await queue.clean(0, 'failed');
+
+  let listPost = await FacebookAdsDao.listTrackedPost(10000);
+  if (listPost && Array.isArray(listPost)) {
+    listPost.forEach(p => {
+      queue.add({
+        postId: p.s_post_id,
+        facebookPageUsername: p.s_facebook_page_username,
+        url:`https://facebook.com/${p.s_facebook_page_username}/posts/${p.s_post_id}`
+      });
+    });
+  }
 }
 
 crawlPost();
