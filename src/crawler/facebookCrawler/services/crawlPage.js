@@ -33,16 +33,28 @@ const crawlPage = (url) => {
       await page0.goto(url);
 
       try {
+        // await page loaded
+        await page0.waitForSelector('.l9j0dhe7.dp1hu0rb.cbu4d94t.j83agx80');
+
+        logger.info(`[CRAWL PAGE] Load successfully ${url}`);
+      } catch (e) {
+        logger.error(`[CRAWL PAGE] Can not get response ${url}`);
+        if (page0) await page0.close();
+        return reject(e);
+      }
+
+
+      try {
         // await new feed
         await page0.waitForSelector('.k4urcfbm.dp1hu0rb.d2edcug0.cbu4d94t.j83agx80.bp9cbjyn');
-        // await related page
+        // await page info block
         await page0.waitForSelector('.sjgh65i0');
 
         logger.info(`[CRAWL PAGE] Load successfully ${url}`);
       } catch (e) {
         logger.error(`[CRAWL PAGE] Can not get response ${url}`);
-        // const username = url.split('?')[0].split('/')[3];
-        // await FacebookPageDao.updateHasAds(username, 0);
+        const username = url.split('?')[0].split('/')[3];
+        await FacebookPageDao.updateHasAds(username, 0);
         if (page0) await page0.close();
         return reject(e);
       }
