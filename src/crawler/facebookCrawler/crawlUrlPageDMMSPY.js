@@ -580,7 +580,7 @@ const crawlUrlPage = async () => {
         await page.$eval('input[name="pass"]', el => el.value = 'Dreadsteed@001');
         await page.click('button[name="login"]');
         await sleep(5000);
-        await page.waitForSelector('div[role="main"]');
+        await page.waitForSelector('img.s45kfl79.emlxlaya.bkmhp75w.spb7xbtv');
         logger.info(`[CRAWL URL PAGE] Login successfully`);
 
         // setInterval(() => {
