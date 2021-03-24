@@ -52,7 +52,7 @@ const addToQueue = async (queue) => {
   await queue.clean(0, 'delayed');
   await queue.clean(0, 'failed');
 
-  let listPage = await FacebookPageDao.list(1, 7, 1000);
+  let listPage = await FacebookPageDao.list(1, 2, 500);
   if (listPage && Array.isArray(listPage)) {
     listPage.forEach(page => {
       queue.add({

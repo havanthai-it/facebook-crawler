@@ -39,8 +39,8 @@ const crawlPage = (url) => {
         logger.info(`[CRAWL PAGE] Load successfully ${url}`);
       } catch (e) {
         logger.error(`[CRAWL PAGE] Can not get response ${url}`);
-        const username = url.split('?')[0].split('/')[3];
-        await FacebookPageDao.updateHasAds(username, 0);
+        // const username = url.split('?')[0].split('/')[3];
+        // await FacebookPageDao.updateHasAds(username, 0);
         if (page0) await page0.close();
         return reject(e);
       }
@@ -55,8 +55,8 @@ const crawlPage = (url) => {
         logger.info(`[CRAWL PAGE] Load successfully ${url}`);
       } catch (e) {
         logger.error(`[CRAWL PAGE] Can not get response ${url}`);
-        const username = url.split('?')[0].split('/')[3];
-        await FacebookPageDao.updateHasAds(username, 0);
+        // const username = url.split('?')[0].split('/')[3];
+        // await FacebookPageDao.updateHasAds(username, 0);
         if (page0) await page0.close();
         return reject(e);
       }
@@ -66,7 +66,7 @@ const crawlPage = (url) => {
       let nScrolls = 5;
       for (let i = 0; i < nScrolls; i++) {
         logger.info(`[CRAWL PAGE] Scroll to bottom ${url}`);
-        await sleep(1000 + 3000 * Math.random());
+        await sleep(5000 + 5000 * Math.random());
         await page0.evaluate(() => {
           window.scrollTo(0, document.body.scrollHeight);
         });
