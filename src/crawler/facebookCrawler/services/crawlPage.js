@@ -34,7 +34,7 @@ const crawlPage = (url) => {
 
       try {
         // await page loaded
-        await page0.waitForSelector('.l9j0dhe7.dp1hu0rb.cbu4d94t.j83agx80');
+        await page0.waitForSelector('svg.pzggbiyp');
 
         logger.info(`[CRAWL PAGE] Load successfully ${url}`);
       } catch (e) {
