@@ -39,6 +39,8 @@ const crawlPage = (url) => {
         logger.info(`[CRAWL PAGE] Load successfully ${url}`);
       } catch (e) {
         logger.error(`[CRAWL PAGE] Can not get response ${url}`);
+        const username = url.split('?')[0].split('/')[3];
+        await FacebookPageDao.updateHasAds(username, 0);
         if (page0) await page0.close();
         return reject(e);
       }
