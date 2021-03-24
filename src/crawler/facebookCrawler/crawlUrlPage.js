@@ -21,8 +21,8 @@ const crawlUrlPage = async () => {
 
         await sleep(5000);
 
-        await page.$eval('input[name="email"]', el => el.value = 'havanthaicvp@gmail.com');
-        await page.$eval('input[name="pass"]', el => el.value = 'Dreadsteed@001');
+        await page.$eval('input[name="email"]', el => el.value = 'havanthai.it@gmail.com');
+        await page.$eval('input[name="pass"]', el => el.value = 'Dreadsteed@000');
         await page.click('button[name="login"]');
         await sleep(5000);
         await page.waitForSelector('div[role="main"]');
