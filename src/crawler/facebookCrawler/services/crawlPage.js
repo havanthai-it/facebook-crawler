@@ -91,10 +91,10 @@ const crawlPage = (url) => {
 
         lstAboutEle.forEach(ele => {
 
-          // category
-          // if (ele.querySelector('i.hu5pjgll.cwsop09l.sp_LM6_uToPDSq.sx_61eff3')) {
-          //   category = ele.innerText.replace(/ · /g, ',');
-          // }
+          category
+          if (ele.querySelector('i.hu5pjgll.cwsop09l') !== null && ele.querySelector('i.hu5pjgll.cwsop09l').innerHTML.toString().indexOf('background-image: url("https://static.xx.fbcdn.net/rsrc.php/v3/y2/r/1SFI6mM7P_b.png"); background-position: 0px -616px;') > -1) {
+            category = ele.innerText.replace(/ · /g, ',');
+          }
 
           // likes
           if (ele.innerText.indexOf('people like this') > -1) {
@@ -186,7 +186,7 @@ const crawlPage = (url) => {
           if (eleSeeMore) await eleSeeMore.click();
 
           // GET CONTENT
-          let ele4 = item.querySelector('span.d2edcug0.hpfvmrgz.qv66sw1b.c1et5uql.rrkovp55.a8c37x1j.keod5gw0.nxhoafnm.aigsh9s9.d3f4x2em.fe6kdd0r.mau55g9w.c8b282yb.iv3no6db.gfeo3gy3.a3bd9o3v.knj5qynh.oo9gr5id.hzawbc8m');
+          let ele4 = item.querySelector('span.d2edcug0.hpfvmrgz.qv66sw1b.c1et5uql.a8c37x1j.keod5gw0.nxhoafnm.aigsh9s9.d3f4x2em.fe6kdd0r.mau55g9w.c8b282yb.iv3no6db.a3bd9o3v.knj5qynh.oo9gr5id.hzawbc8m');
           let content = ele4 ? ele4.innerHTML : '';
 
           // GET BOTTOM ROW (LIKE, SHARE, COMMENT)
