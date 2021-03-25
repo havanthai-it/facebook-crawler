@@ -76,13 +76,13 @@ const crawlPage = (url) => {
       /* START GET PAGE INFORMATION */
       let facebookPage = await page0.evaluate(() => {
         // const el0 = document.querySelector('.bi6gxh9e.aov4n071 .tojvnm2t.a6sixzi8.abs2jz4q.a8s20v7p.t1p8iaqh.k5wvi7nf.q3lfd5jv.pk4s997a.bipmatt0.cebpdrjk.qowsmv63.owwhemhu.dp1hu0rb.dhp61c6y.iyyx5f41');
-        const el1 = document.querySelector('.d2edcug0.hpfvmrgz.qv66sw1b.c1et5uql.rrkovp55.a8c37x1j.keod5gw0.nxhoafnm.aigsh9s9.embtmqzv.fe6kdd0r.mau55g9w.c8b282yb.hrzyx87i.m6dqt4wy.h7mekvxk.hnhda86s.oo9gr5id.hzawbc8m');
+        const el1 = document.querySelector('.d2edcug0.hpfvmrgz.qv66sw1b.c1et5uql.a8c37x1j.keod5gw0.nxhoafnm.aigsh9s9.embtmqzv.fe6kdd0r.mau55g9w.c8b282yb.hrzyx87i.m6dqt4wy.h7mekvxk.hnhda86s.oo9gr5id.hzawbc8m');
         const el2 = document.querySelector('.b3onmgus.e5nlhep0.ph5uu5jm.ecm0bbzt.spb7xbtv.bkmhp75w.emlxlaya.s45kfl79.cwj9ozl2 image');
         const el3 = document.querySelector('.s9t1a10h > span');
         // const el5 = document.querySelector('');
         // const el6 = document.querySelector('');
 
-        const lstAboutEle = document.querySelectorAll('.cbu4d94t.j83agx80.cwj9ozl2  .dwo3fsh8.g5ia77u1.rt8b4zig.n8ej3o3l.agehan2d.sk4xxmp2.rq0escxv.q9uorilb.kvgmc6g5.cxmmr5t8.oygrvhab.hcukyx3x.jb3vyjys.rz4wbd8a.qt6c0cv9.a8nywdso.l9j0dhe7.i1ao9s8h.k4urcfbm');
+        const lstAboutEle = document.querySelectorAll('.sjgh65i0 .j83agx80.l9j0dhe7.k4urcfbm .j83agx80.cbu4d94t.sj5x9vvc.cxgpxx05');
         let category = '';
         let likes = 0;
         let follows = 0;
@@ -92,9 +92,9 @@ const crawlPage = (url) => {
         lstAboutEle.forEach(ele => {
 
           // category
-          if (ele.querySelector('i.hu5pjgll.cwsop09l.sp_LM6_uToPDSq.sx_61eff3')) {
-            category = ele.innerText.replace(/ · /g, ',');
-          }
+          // if (ele.querySelector('i.hu5pjgll.cwsop09l.sp_LM6_uToPDSq.sx_61eff3')) {
+          //   category = ele.innerText.replace(/ · /g, ',');
+          // }
 
           // likes
           if (ele.innerText.indexOf('people like this') > -1) {
