@@ -30,9 +30,11 @@ const crawlPost = async () => {
 
         await addToQueue(postQueue);
         setInterval(async () => {
-          await addToQueue(postQueue);
-        }, 1000*60*60*24);
-        
+          urlPageQueue.count().then(async (n) => {
+            logger.info(`[CRAWL POST] postQueue.count() = ${n}`);
+            if (n === 0) await addToQueue(postQueue);
+          });
+        }, 1000 * 60 * 30);        
       } catch (e) {
         logger.error(`[CRAWL POST] Already login or there are some errors occured: ${e}`);
       }

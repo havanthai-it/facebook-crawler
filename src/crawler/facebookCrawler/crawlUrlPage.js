@@ -21,7 +21,7 @@ const crawlUrlPage = async () => {
 
         await sleep(5000);
 
-        await page.$eval('input[name="email"]', el => el.value = 'havanthai.it@gmail.com');
+        await page.$eval('input[name="email"]', el => el.value = '0562038008');
         await page.$eval('input[name="pass"]', el => el.value = 'Dreadsteed@000');
         await page.click('button[name="login"]');
         await sleep(5000);
@@ -30,8 +30,11 @@ const crawlUrlPage = async () => {
 
         await addToQueue(urlPageQueue);
         setInterval(async () => {
-          await addToQueue(urlPageQueue);
-        }, 1000*60*60*24);
+          urlPageQueue.count().then(async (n) => {
+            logger.info(`[CRAWL URL PAGE] urlPageQueue.count() = ${n}`);
+            if (n === 0) await addToQueue(urlPageQueue);
+          });
+        }, 1000 * 60 * 30);
       } catch (e) {
         logger.error(`[CRAWL URL PAGE] Already login or there are some errors occured: ${e}`);
       }
@@ -51,7 +54,7 @@ const addToQueue = async (queue) => {
   await queue.clean(0, 'delayed');
   await queue.clean(0, 'failed');
 
-  let listPageUrl = await FacebookPageDao.listPageUrl(2000, 0);
+  let listPageUrl = await FacebookPageDao.listPageUrl(2000, 4000);
   if (listPageUrl && Array.isArray(listPageUrl)) {
     listPageUrl.forEach(url => {
       queue.add({

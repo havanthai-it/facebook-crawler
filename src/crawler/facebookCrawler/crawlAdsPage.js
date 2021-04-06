@@ -30,9 +30,11 @@ const crawlAdsPage = async () => {
 
         await addToQueue(adsPageQueue);
         setInterval(async () => {
-          await addToQueue(adsPageQueue);
-        }, 1000*60*60*24);
-        
+          urlPageQueue.count().then(async (n) => {
+            logger.info(`[CRAWL ADS PAGE] adsPageQueue.count() = ${n}`);
+            if (n === 0) await addToQueue(adsPageQueue);
+          });
+        }, 1000 * 60 * 30);
       } catch (e) {
         logger.info(`[CRAWL ADS PAGE] Already login or there are some errors occured: ${e}`);
       }
