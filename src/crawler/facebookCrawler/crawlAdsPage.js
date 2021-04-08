@@ -30,7 +30,7 @@ const crawlAdsPage = async () => {
 
         await addToQueue(adsPageQueue);
         setInterval(async () => {
-          urlPageQueue.count().then(async (n) => {
+          adsPageQueue.count().then(async (n) => {
             logger.info(`[CRAWL ADS PAGE] adsPageQueue.count() = ${n}`);
             if (n === 0) await addToQueue(adsPageQueue);
           });
