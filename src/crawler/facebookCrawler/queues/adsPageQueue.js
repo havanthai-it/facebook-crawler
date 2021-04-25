@@ -47,8 +47,8 @@ adsPageQueue.process(config.queue.adsPageQueue.concurrency, async (job) => {
     return Promise.resolve(job.data);
   } catch (e) {
     logger.error(`[ADS PAGE QUEUE] ${e}`);
-    if (username && facebookPage && foundPage && foundPage.length > 0) {
-      facebookPage.nHasAds = 98;
+    if (username && foundPage && foundPage.length > 0) {
+      FacebookPageDao.updateHasAds(username, 98);
     }
     return Promise.reject(e);
   }
