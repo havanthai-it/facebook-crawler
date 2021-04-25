@@ -11,7 +11,7 @@ class FacebookPageDao {
 
   /**
    * @param {string} id 
-   * @returns {FacebookPage}
+   * @returns {any}
    */
   static async get(id) {
     const query = "SELECT * FROM tb_facebook_page WHERE s_id = ?";
@@ -21,7 +21,7 @@ class FacebookPageDao {
 
   /**
    * @param {string} username 
-   * @returns {FacebookPage}
+   * @returns {any}
    */
   static async getByUsername(username) {
     const query = "SELECT * FROM tb_facebook_page WHERE s_username = ?";

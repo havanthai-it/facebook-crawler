@@ -9,6 +9,9 @@ const crawlPage = require('../services/crawlPage');
 
 const adsPageQueue = new Queue('adsPageQueue', 'redis://127.0.0.1:6379');
 adsPageQueue.process(config.queue.adsPageQueue.concurrency, async (job) => {
+  const username = null;
+  const foundPage = null;
+  const facebookPage = null;
   try {
     if (!Browser.instance) {
       await sleep(60000);
@@ -16,17 +19,17 @@ adsPageQueue.process(config.queue.adsPageQueue.concurrency, async (job) => {
 
     logger.info(`[ADS PAGE QUEUE] Start crawl ${job.data.url}`);
 
-    const username = job.data.url.split('?')[0].split('/')[3];
-    const foundPage = await FacebookPageDao.getByUsername(username);
+    username = job.data.url.split('?')[0].split('/')[3];
+    foundPage = await FacebookPageDao.getByUsername(username);
 
-    const facebookPage = await crawlPage(job.data.url);
+    facebookPage = await crawlPage(job.data.url);
     logger.info(`[ADS PAGE QUEUE] crawled page info: ${JSON.stringify(facebookPage)}`);
 
     // Save page info
     if (!foundPage || foundPage.length === 0) {
       await FacebookPageDao.insert(facebookPage);
     } else {
-      facebookPage.nHasAds = foundPage.nHasAds;
+      facebookPage.nHasAds = 1;
       await FacebookPageDao.update(facebookPage);
     }
 
@@ -44,6 +47,9 @@ adsPageQueue.process(config.queue.adsPageQueue.concurrency, async (job) => {
     return Promise.resolve(job.data);
   } catch (e) {
     logger.error(`[ADS PAGE QUEUE] ${e}`);
+    if (username && facebookPage && foundPage && foundPage.length > 0) {
+      facebookPage.nHasAds = 98;
+    }
     return Promise.reject(e);
   }
 });
