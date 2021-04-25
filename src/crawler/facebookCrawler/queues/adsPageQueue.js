@@ -26,6 +26,7 @@ adsPageQueue.process(config.queue.adsPageQueue.concurrency, async (job) => {
     if (!foundPage || foundPage.length === 0) {
       await FacebookPageDao.insert(facebookPage);
     } else {
+      facebookPage.nHasAds = foundPage.nHasAds;
       await FacebookPageDao.update(facebookPage);
     }
 
