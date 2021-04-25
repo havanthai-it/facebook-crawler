@@ -9,9 +9,9 @@ const crawlPage = require('../services/crawlPage');
 
 const adsPageQueue = new Queue('adsPageQueue', 'redis://127.0.0.1:6379');
 adsPageQueue.process(config.queue.adsPageQueue.concurrency, async (job) => {
-  const username = null;
-  const foundPage = null;
-  const facebookPage = null;
+  let username = null;
+  let foundPage = null;
+  let facebookPage = null;
   try {
     if (!Browser.instance) {
       await sleep(60000);
